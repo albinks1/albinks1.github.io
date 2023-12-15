@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Ma page de test</title>
+    
+    <link href="styles/style.css" rel="stylesheet" type="text/css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500&display=swap" rel="stylesheet">
+
+  </head>
+  <body>
+    <h1>Mon titre principal</h1>
+    <a href="https://www.mozilla.org/fr/">
+      <img
+        src="images/300SL.png"
+        alt="Image d'une Mercedes-Benz 300SL" />
+    </a>
+    
+    <p>Mon chat est <strong>très</strong> grincheux</p>
+
+    <!-- 4 niveaux de titres : -->
+    <h2>Mon titre de deuxième niveau</h2>
+    <h3>Mon sous-titre</h3>
+    <p>
+      L'élément citation — <code>&lt;q&gt;</code> — est
+      <q cite="/fr/docs/Web/HTML/Element/q">prévu pour de courtes citations ne nécessitant pas un nouvel alinéa</q>.
+    </p>
+    <blockquote cite="/fr/docs/Web/HTML/Element/blockquote">
+      <p>
+        L'<strong>Élément HTML <code>&lt;blockquote&gt;</code></strong> (ou <em>Élément HTML bloc de citation</em>) indique que le bloc de texte inclus est une citation étendue.
+      </p>
+    </blockquote>
+    <p>Selon la <a href="/fr/docs/Web/HTML/Element/blockquote"> <cite>page blockquote du MDN</cite></a>: </p>
+      <p>L'<strong>Élément HTML <code>&lt;blockquote&gt;</code></strong> (ou <em>Élément HTML bloc de citation</em>) 'indique que le bloc de texte inclus est une citation étendue.</p>
+      
+      <p>L'élément citation — <code>&lt;q&gt;</code> — est <q cite="/fr/docs/Web/HTML/Element/q">prévu
+         pour de courtes citations ne nécessitant pas un nouvel alinéa</q>.</p>
+       — <a href="/fr/docs/Web/HTML/Element/q">
+      <cite>page q du MDN</cite></a>.</p>
+    
+    <p> Nous utilisons l'<abbr title="Hypertext Markup Language">HTML</abbr> pour structurer nos documents web. </p>
+      
+    <address> <p>Chris Mills, Manchester, The Grim North, UK</p> </address>
+    
+    <p>Ma date de naissance est le 1<sup>er</sup> mai 2001.</p> <p> La formule chimique de la caféine est C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>. </p>
+    
+    <p>Si x<sup>2</sup> égale 9, x doit valoir 3 ou -3.</p>
+
+    <pre><code>var para = document.querySelector('p');
+
+      para.onclick = function() {
+        alert('Owww, arrête de me toucher !');
+      }</code></pre>
+      
+      <p>
+        N'utilisez pas d'éléments de présentation comme <code>&lt;font&gt;</code> et
+        <code>&lt;center&gt;</code>.
+      </p>
+      
+      <p>
+        Dans l'exemple JavaScript ci‑dessus, <var>para</var> représente un élément
+        paragraphe.
+      </p>
+      
+      <p>
+        Sélectionnez la totalité du texte avec <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> +
+        <kbd>A</kbd>.
+      </p>
+      
+      <pre>$ <kbd>ping mozilla.org</kbd>
+      <samp>PING mozilla.org (63.245.208.195) 56(84) bytes of data.
+      64 bytes from mozilla.org (63.245.208.195): icmp_seq=1 ttl=46 time=191 ms</samp></pre>
+      
+
+    <h4>Mon sous-sous-titre</h4>
+    <p>À Mozilla, nous formons une communauté de</p>
+    <a href="https://www.apple.com/fr/">lien vers le site d'Apple</a>
+    <p><a href="mailto:albinplaneille@gmail.com">Envoyer un mail</a></p>
+    <ul>
+        <li>Bidouilleuses</li>
+        <li>Concepteurs</li>
+        <li>Constructrices</li>
+    </ul>
+    <p>qui travaillent ensemble…</p>
+    <p>En HTML, un paragraphe se définit avec l'élément.</p>
+
+    <p>En HTML, un paragraphe se définit avec l'élément &lt;p&gt;.</p>
+
+    <button>Changer d'utilisateur</button>
+
+    <script src="scripts/main.js"></script>
+
+  </body>
+</html>
