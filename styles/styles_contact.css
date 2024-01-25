@@ -12,6 +12,13 @@ footer{
     font-size: 2vh;
 }
 
+.card{
+    z-index: -1;
+    border-radius: 3vb;
+    overflow: hidden;
+}
+
+
 .container-fluid{
     /*background-color: rgba(182, 182, 182, 0.5);*/
     position: sticky;
@@ -24,7 +31,7 @@ body{
     background-color: rgb(233, 231, 231);
 }
 .container{
-    width:80%;
+    width:90%;
 }
 
 .block {
