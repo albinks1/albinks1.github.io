@@ -4,12 +4,25 @@ footer{
     min-height: 10vh;
 }
 .souscont{
-    background-color: rgb(255, 255, 255);
-    height:25px;
+    background-color: rgba(255, 255, 255, 0.5);
+    height:50px;
 }
+
+.blur-background {
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(20px);
+  }
+
 .souscont h1{
-    padding-left:1px;
-    font-size: 2vh;
+    z-index: 1;
+    padding-left:10px;
+    /*pas mega utile au dessus*/
+    font-size: 200%;
 }
 
 .card{
@@ -20,6 +33,7 @@ footer{
 
 
 .container-fluid{
+    z-index: 1;
     /*background-color: rgba(182, 182, 182, 0.5);*/
     position: sticky;
     top: 0;
