@@ -3,6 +3,8 @@
     100% {opacity: 1;}
 }
 
+
+
 .bloc {
     opacity: 0;
     transition: opacity 500ms ease-in-out;
@@ -39,11 +41,9 @@ footer{
     background-color: rgb(199, 200, 201);
     min-height: 10vh;
 }
-
-.card-img-overlay {
-    color: white;
-    background: linear-gradient(to top, rgb(136, 136, 136) 0%, transparent 17vh);
-    width: 100%;
+.souscont{
+    background-color: rgba(255, 255, 255, 0.8);
+    height:50px;
 }
 
 .blur-background {
@@ -53,41 +53,22 @@ footer{
     left: 0;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(20px);
   }
 
-/* .souscont h1{
+.souscont h1{
     z-index: 1;
-    padding-left:60px;
-    /* pas mega utile au dessus
-    font-size: 200%;} */
+    padding-left:10px;
+    /*pas mega utile au dessus*/
+    font-size: 200%;
+}
 
 .card{
-    position: relative; /* Ajouté pour positionner les enfants de manière absolue par rapport à la carte */
+    z-index: -1;
     border-radius: 3vb;
     overflow: hidden;
 }
 
-.card-img-overlay .card-title{
-    position: absolute;
-    bottom: 40px; /* Ajustez cette valeur en fonction de la hauteur de votre texte */
-    margin-bottom: 10px; /* Ajoute de l'espace entre le titre et le texte */
-}
-
-.card-img-overlay .card-text{
-    position: absolute;
-    bottom: 10px; /* Ajouté pour positionner le texte en bas de la carte */
-}
-
-.card-img-overlay .overlay-text {
-    position: absolute;
-    bottom: 0;
-    left: 8%;
-    color: white;
-    font-family: 'Helvetica', sans-serif;
-    font-size: 5vh; /* Ajouté pour augmenter la taille du texte */
-    font-weight: bold; /* Ajouté pour rendre le texte gras */
-}
 
 .container-fluid{
     z-index: 1;
@@ -101,7 +82,6 @@ footer{
 body{
     background-color: rgb(233, 231, 231);
 }
-
 .container{
     width:90%;
     /* animation: fadeIn 0.5s ease-in-out; */

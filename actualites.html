@@ -64,11 +64,14 @@
           </div>
         </nav>
       </header>
-      <div class="souscont">
+
+      <div class="souscont pl-md-4">
         <div class="blur-background"></div>
-        <h1 class="rappeldepage ms-4">Actualités</h1>
-      </div>
-    </div> 
+          <div class="container">
+            <h1 class="rappeldepage">Actualités</h1>
+          </div>
+        </div>
+      </div> 
 
     <main class="container">
       <div class="container mt-0">
@@ -76,21 +79,23 @@
 
 
         <div class="container mt-4 mb-4">
-          <div class="card text-bg-dark">
-            <img src="images/mini_sigma.jpeg"
+          <div class="card bloc">
+            <img src="images/pres_sigmalogo.png"
             class="card-img"
             alt="descript">
+
+            <!-- <div class="tete_actu"> -->
             <div class="card-img-overlay">
-              <h1 class="card-title">Wow, un mini Sigma</h1>
-              <p class="card-text">Eh non, il ne s'agit pas du batiment méca de Sigma, bien que l'illusion soit forte</p>
-              <p class="card-text"><small></small></p>
+              <h1 class="card-title ms-2">Le site fait peau neuve</h1>
+              <p class="card-text ms-2">Il faut bien se renouveler de temps en temps...</p>
+              <p class="card-text"><small></small></p> 
+            <!-- </div> -->
             </div>
           </div>
 
-
           <div class="row row-cols-1 row-cols-lg-2 g-4 mt-4">
             <!--remplacer lg par md si ca va pas-->
-            <div class="col">
+            <div class="col bloc" data-delay="100">
               <div class="card">
                 <img src="images/275gtb.png" class="card-img-top" alt="...">
                 <div class="card-body">
@@ -99,7 +104,7 @@
                 </div>
               </div>
             </div>
-            <div class="col">
+            <div class="col bloc" data-delay="200">
               <div class="card">
                 <img src="images/300sl.png" class="card-img-top" alt="...">
                 <div class="card-body">
@@ -108,7 +113,7 @@
                 </div>
               </div>
             </div>
-            <div class="col">
+            <div class="col bloc" data-delay="300">
               <div class="card">
                 <img src="images/300sl.png" class="card-img-top" alt="...">
                 <div class="card-body">
@@ -117,7 +122,7 @@
                 </div>
               </div>
             </div>
-            <div class="col">
+            <div class="col bloc" data-delay="400">
               <div class="card">
                 <img src="images/275gtb.png" class="card-img-top" alt="...">
                 <div class="card-body">
@@ -140,5 +145,6 @@
         <!-- Ici, vous pouvez ajouter des informations de copyright, des liens vers des pages de politique de confidentialité, etc. -->
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="scripts/main.js"></script>
   </body>
 </html>
