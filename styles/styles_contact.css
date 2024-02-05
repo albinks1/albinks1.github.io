@@ -7,6 +7,10 @@
     opacity: 0;
     transition: opacity 500ms ease-in-out;
 }
+
+.bloc_logo_footer{
+    width: 30%;
+}
 .image-container {
     position: relative;
     width: 100%;
