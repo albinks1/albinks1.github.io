@@ -7,11 +7,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <!-- <link rel="shortcut icon" href="../images_main/favicon_sr.png" type="image/x-icon" /> -->
     <link href="../styles/style_main.css" rel="stylesheet" type="text/css" />
+    <!-- <link rel="stylesheet" src="./style_anim.css"> -->
     <!-- <link rel="stylesheet" href="https://cdn.rawgit.com/michalsnik/aos/2.1.1/dist/aos.css" /> -->
 </head>
 
-<div class="m-3">
-<h2>Formulaire de génération de signature d'e-mail Sigmatronik</h2>
+
+<div class="container d-flex justify-content-between align-items-center">
+  <h2 class="m-3">Formulaire de génération de signature d'e-mail Sigmatronik</h2>
+  <img src="../img_signature/s-tronik.png" width="120" style="height: auto;" class="img-fluid m-3">
+</div>
+
+<div class="m-3"> <!-- le m-3 est global -->
+<!-- <h2>Formulaire de génération de signature d'e-mail Sigmatronik</h2> -->
 <h6 class="mb-5">La procédure est identique à celle utilisée pour la signature SIGMA standard. </h6>
 
 <p>1. Enregistrer les fichiers images suivants de votre signature sur votre PC (Sur chaque item, clic-droit, enregistrer la cible du lien sous).</p>
@@ -41,7 +48,7 @@
     <input type="text" id="detail2" name="detail2" class="form-control" oninput="genererSignature()"><br>
     <label for="telephone">Numéro de téléphone:</label><br>
     <input type="text" id="telephone" name="telephone" class="form-control" oninput="genererSignature()"><br>
-    <label for="loginZimbra">Login Zimbra (Pour Jean Michel, c'est "jmichel" ; pour Patrick Balkany, c'est "pbalkany". Tu as compris ?):</label><br>
+    <label for="loginZimbra">Login Zimbra (pour Patrick Balkany, c'est "pbalkany"):</label><br>
     <input type="text" id="loginZimbra" name="loginZimbra" class="form-control" oninput="genererSignature()"><br>
   </form>
 </div>
@@ -49,22 +56,22 @@
 <h3>Prévisualisation de la signature :</h3>
 <div id="signature"></div>
 
-<p>3. Pour finir, procéder comme ceci :</p>
-<ul class="list-group"></ul>
-  <li class="list-group-item">
-    Aller dans la messagerie Zimbra, puis en haut à droite sur la roue dentée : "Application Web classique"
+<p class="mt-5">3. Pour finir, procéder comme ceci :</p>
+<ul class="list-group mb-3"></ul>
+  <li class="list-group-item mb-3">
+    - Aller dans la messagerie Zimbra, puis en haut à droite sur la roue dentée : "Application Web classique"
   </li>
-  <li class="list-group-item">
-    Aller dans l'onglet "porte-documents" puis "Uploader le fichier".
+  <li class="list-group-item mb-3">
+    - Aller dans l'onglet "porte-documents" puis "Uploader le fichier".
   </li>
-  <li class="list-group-item">
-    "Sélect. fichiers" puis séléctionner les 4 images que vous avez enregistrées en étape 1 (Ctrl + clics pour séléctionner plusieurs images) puis "Ok"<br />Nota : si vous avez déjà une signature SIGMA, inutile d'enregistrer et d'uploader les logos LinkedIn et Facebook puisqu'ils sont déjà dans le porte-documents.
+  <li class="list-group-item mb-3">
+    - "Sélect. fichiers" puis séléctionner les 4 images que vous avez enregistrées en étape 1 (Ctrl + clics pour séléctionner plusieurs images) puis "Ok"<br />Nota : si vous avez déjà une signature SIGMA, inutile d'enregistrer et d'uploader les logos LinkedIn et Facebook puisqu'ils sont déjà dans le porte-documents.
   </li>
-  <li class="list-group-item"></li>
-    Allez ensuite dans "Préférences", puis "Signatures", puis "Nouvelle signature", donnez-lui un nom puis en haut à droite, cliquez sur "Format texte simple" et passez à "Format HTML".
+  <li class="list-group-item mb-3"></li>
+    - Allez ensuite dans "Préférences", puis "Signatures", puis "Nouvelle signature", donnez-lui un nom puis en haut à droite, cliquez sur "Format texte simple" et passez à "Format HTML".
   </li>
-  <li class="list-group-item"></li>
-  Copiez le code source en cliquant sur ce bouton : 
+  <li class="list-group-item mb-3"></li>
+    - Copiez le code source en cliquant sur ce bouton bleu : 
 
   <!-- Zone cachée pour stocker le code HTML de la signature -->
   <input type="hidden" id="htmlCode">
@@ -72,8 +79,8 @@
 
   puis cliquez sur l'icone qui ressemble à "<>". Cela ouvre un onglet "Code source". Collez le code dans cet emplacement. Puis "Ok"
   </li>
-  <li class="list-group-item"></li>
-  Cliquez sur "Enregistrer" en haut à gauche. N'ouvliez pas de tester si la signature n'a pas de problèmes. Par exmple en vous envoyant un mail à vous-même.
+  <li class="list-group-item mb-3"></li>
+  - Cliquez sur "Enregistrer" en haut à gauche. N'oubliez pas de tester si la signature n'a pas de problèmes. Par exmple en vous envoyant un mail à vous-même.
   </li>
 </ul>
 
@@ -136,9 +143,12 @@ function copierSignature() {
 </div>
 
 <!--inutile mais rigolo-->
+<div class="m-5">
 <body style="overflow-x: hidden; ">
   <object class="canvas"type="image/svg+xml" data="./logo-3/0000-0025.svg">Votre navigateur ne supporte pas SVG</object>
 <canvas class="canvas"></canvas>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha512-onMTRKJBKz8M1TnqqDuGBlowlH0ohFzMXYRNebz+yOcc5TQr/zAKsthzhuv0hiyUKEiQEQXEynnXCvNTOk50dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="./app.js"></script>
