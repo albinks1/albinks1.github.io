@@ -1,0 +1,14 @@
+#toolbar {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+.icon {
+    cursor: pointer;
+    margin-right: 10px;
+}
+canvas {
+    border: 1px solid black;
+}
+pre {
+    white-space: pre-wrap; /* Permet de gérer les sauts de ligne */
+}

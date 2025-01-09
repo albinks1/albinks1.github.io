@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<body>
+<head>
+    <meta charset="utf-8" />
+    <title>Sigmatronik - Générateur de signature</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- <link rel="shortcut icon" href="../images_main/favicon_sr.png" type="image/x-icon" /> -->
+    <link href="../styles/style_main.css" rel="stylesheet" type="text/css" />
+    <!-- <link rel="stylesheet" src="./style_anim.css"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.rawgit.com/michalsnik/aos/2.1.1/dist/aos.css" /> -->
+</head>
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">
+          <img src="images/logo_albinks.png" width="40" height="40" class="d-inline-block align-top ms-5" alt="Logo">
+          Albinks
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+              <li class="nav-item">
+                  <a class="nav-link btn btn-outline-primary" href="tikz_converter.html">Tikz</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link btn btn-outline-secondary" href="signature.html">Signature</a>
+              </li>
+          </ul>
+      </div>
+  </nav>
+</header>
+
+<div class="container ml-5"> <!-- le m-3 est global -->
+<!-- <div class="container d-flex justify-content-between align-items-start"> -->
+  <img src="../img_signature/s-tronik.png" width="120" style="height: auto;" class="img-fluid m-3">
+  <h2 class="m-3">Formulaire de génération de signature d'e-mail Sigmatronik</h2>
+<!-- </div> -->
+
+<div class="m-3"> <!-- le m-3 est global -->
+<!-- <h2>Formulaire de génération de signature d'e-mail Sigmatronik</h2> -->
+<h6 class="mb-5">La procédure est identique à celle utilisée pour la signature SIGMA standard. </h6>
+
+<p>1. Enregistrer les fichiers images suivants de votre signature sur votre PC (en cliquant sur les liens).</p>
+<ul class="list-group"></ul>
+  <li class="list-group-item">
+    <p><a href="logo_sc_stronik.png" download="logo_sc_stronik.png">Logo SIGMA & Sigmatronik</a> (le nom de l'image <strong>doit</strong> être "logo_sc_stronik.png").</p>
+  </li>
+  <li class="list-group-item">
+    <p><a href="facebook.png" download="facebook.png">Logo Facebook</a> (le nom de l'image <strong>doit</strong> être "facebook.png").</p>
+  </li>
+  <li class="list-group-item">
+    <p><a href="linkedin.png" download="linkedin.png">Logo LinkedIn</a> (le nom de l'image <strong>doit</strong> être "linkedin.png").</p>
+  </li>
+  <li class="list-group-item"></li>
+    <p><a href="x.png" download="x.png">Logo X (anciennement Twitter)</a> (le nom de l'image <strong>doit</strong> être "x.png").</p>
+  </li>
+</ul>
+
+<div class="mb-3 mt-5">
+  <p>2. Renseigner les informations suivantes :</p>
+  <form id="signatureForm" class="ms-4">
+    <label for="nom">Nom Prénom:</label><br>
+    <input type="text" id="nom" name="nom" class="form-control" oninput="genererSignature()"><br>
+    <label for="detail1">Détail 1:</label><br>
+    <input type="text" id="detail1" name="detail1" class="form-control" oninput="genererSignature()"><br>
+    <label for="detail2">Détail 2:</label><br>
+    <input type="text" id="detail2" name="detail2" class="form-control" oninput="genererSignature()"><br>
+    <label for="telephone">Numéro de téléphone:</label><br>
+    <input type="text" id="telephone" name="telephone" class="form-control" oninput="genererSignature()"><br>
+    <label for="loginZimbra">Login Zimbra (pour Patrick Balkany, c'est "pbalkany"):</label><br>
+    <input type="text" id="loginZimbra" name="loginZimbra" class="form-control" oninput="genererSignature()"><br>
+  </form>
+</div>
+
+<h3>Prévisualisation de la signature :</h3>
+<div id="signature"></div>
+
+<p class="mt-5">3. Pour finir, procéder comme ceci :</p>
+<ul class="list-group mb-3"></ul>
+  <li class="list-group-item mb-3">
+    - Aller dans la messagerie Zimbra, puis en haut à droite sur la roue dentée : "Application Web classique" ;
+  </li>
+  <li class="list-group-item mb-3">
+    - Aller dans l'onglet "porte-documents" puis "Uploader le fichier" ;
+  </li>
+  <li class="list-group-item mb-3">
+    - "Sélect. fichiers" puis séléctionner les 4 images que vous avez enregistrées en étape 1 (Ctrl + clics pour séléctionner plusieurs images) puis "Ok" ;
+  </li>
+  <li class="list-group-item mb-3"></li>
+    - Allez ensuite dans "Préférences", puis "Signatures", puis "Nouvelle signature", donnez-lui un nom puis en haut à droite, cliquez sur "Format texte simple" et passez à "Format HTML" ;
+  </li>
+  <li class="list-group-item mb-3"></li>
+    - Copiez le code source en cliquant sur ce bouton bleu : 
+
+  <!-- Zone cachée pour stocker le code HTML de la signature -->
+  <input type="hidden" id="htmlCode">
+  <button id="copyButton" class="btn btn-primary" onclick="copierSignature()">Copier</button>
+
+  puis cliquez sur l'icone qui ressemble à "<>". Cela ouvre un onglet "Code source". Collez le code dans cet emplacement. Puis "Ok" ;
+  </li>
+  <li class="list-group-item mb-3"></li>
+  - Cliquez sur "Enregistrer" en haut à gauche. N'oubliez pas de tester si la signature n'a pas de problèmes. Par exmple en vous envoyant un mail à vous-même.
+  </li>
+</ul>
+<p class="mt-5 mb-5"><i>S'il y a un problème, envoyez-moi en message (Albin sur WhatsApp)</i></p>
+</div>
+
+<script>
+function genererSignature() {
+  var loginZimbra = document.getElementById("loginZimbra").value;
+  var nom = document.getElementById("nom").value;
+  var detail1 = document.getElementById("detail1").value;
+  var detail2 = document.getElementById("detail2").value;
+  var telephone = document.getElementById("telephone").value;
+
+  var signaturePreview = '<div></div><div style="width: 100%; display: inline-block; margin: 0px 0px 0px 0px;"><div style="padding: 5px 0px 0px 20px;"><p style="float: left; font-family: \'arial\' , sans-serif; margin: 0px 5px 0px 0px;"><a href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"><img src="img_signature/logo_sc_stronik.png" dfsrc="doc:img_signature/logo_sc_stronik.png" alt="SIGMA Clermont et Sigmatronik" width="310" style="height: auto; display: block;"/></a></p><p style="float: left; font-family: \'arial\' , sans-serif; margin: 0px 0px 0px 20px; border-left: 3px solid #347c40; padding: 0px 0px 0px 10px;"><span id="templateWebNomPrenom" style="font-size: 10pt; color: #347c40; font-weight: bold;">'
+  + nom + '</span><br /><span id="templateWebDetail1" style="font-size: 10pt; color: #1e2d46; font-weight: bold;">'
+  + detail1 + '</span><br /><span id="templateWebDetail3" style="font-size: 10pt; color: #1e2d46; font-weight: bold;">'
+  + detail2 + '</span><br /><span id="templateWebTelephone" style="font-size: 10pt; color: #1e2d46; font-weight: bold;">'
+  + telephone + '</span><br /><br /><a style="font-size: 10pt; text-decoration: none; color: #347c40;" href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"><strong>SIGMA Clermont</strong></a><br /><span style="font-size: 10pt;">20 avenue Blaise Pascal TSA 62006 63178 AUBIERE Cedex</span><br /><span style="font-size: 10pt;">&Eacute;cole affili&eacute;e &agrave; l\'Institut des Mines Telecom</span><br /><br /><a href="https://x.com/SigmaClermont" rel="nofollow noopener noreferrer" target="_blank"><img src="img_signature/x.png" dfsrc="doc:img_signature/x.png" alt="X ou Twitter" style="margin: 5px;" width="35" height="35" /></a><a href="https://www.facebook.com/SigmaClermont" rel="nofollow noopener noreferrer" target="_blank"><img src="img_signature/facebook.png" dfsrc="doc:img_signature/facebook.png" alt="Facebook" style="margin: 5px;" width="35" height="35" /></a><a href="https://www.linkedin.com/school/15129626" rel="nofollow noopener noreferrer" target="_blank"><img src="../img_signature/linkedin.png" dfsrc="doc:img_signature/linkedin.png" alt="LinkedIn" style="margin: 5px;" width="35" height="35" /></a></p></div></div><div></div>'
+
+  // var signaturePreview = '<div></div><div style="width: 100%; display: inline-block; margin: 0px 0px 0px 0px;"><div style="padding: 5px 0px 0px 20px;"><p style="float: left; font-family: \'arial\' , sans-serif; margin: 0px 5px 0px 0px;"><a href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"> <img src="img_signature/logo-sr.png" dfsrc="doc:img_signature/logo-sr.png" alt="SIGMA Racing" style="height: 80px;" /> </a></p><p style="float: left; font-family: \'arial\' , \'helvetica\' , sans-serif; margin: 0px 0px 0px 20px;"><img src="img_signature/ligne-separatrice.png" dfsrc="img_signature/ligne-separatrice.png" style="height: 100%; padding: 0px 0px 0px 20px; margin-right: 40px;" /></p><div style="padding: 5px 0px 0px 20px;"><span id="templateWebNomPrenom" style="font-size: 11pt; color: #b50000; font-weight: bold;">' 
+  // + nom + '</span><br /><span id="templateWebDetail1" style="font-size: 11pt; color: #202020; font-weight: bold;">' 
+  // + detail1 + '</span><br /><span id="templateWebDetail3" style="font-size: 11pt; color: #202020; font-weight: bold;">' 
+  // + detail2 + '</span><br /><span id="templateWebTelephone" style="font-size: 11pt; color: #202020; font-weight: bold;">' 
+  // + telephone + '</span><br /><br /><a style="font-size: 11pt; text-decoration: none; color: #b50000;" href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"> <strong>SIGMA Racing</strong> </a><br /><span style="font-size: 11pt;"> 20 avenue Blaise Pascal TSA 62006 63178 AUBIERE Cedex </span><br /><br /><a href="https://www.instagram.com/ecurie_sigmaracing/" rel="nofollow noopener noreferrer" target="_blank"> <img src="img_signature/instagram-sr.png" dfsrc="doc:Briefcase/instagram-sr.png" alt="Instagram" style="margin: 5px;" /> </a><a href="https://www.facebook.com/sigmaracing1" rel="nofollow noopener noreferrer" target="_blank"> <img src="img_signature/facebook-sr.png" dfsrc="doc:img_signature/facebook-sr.png" alt="Facebook" style="margin: 5px;" /> </a><a href="https://www.linkedin.com/company/sigma-racing/" rel="nofollow noopener noreferrer" target="_blank"> <img src="img_signature/linkedin-sr.png" dfsrc="doc:img_signature/linkedin-sr.png" alt="LinkedIn" style="margin: 5px;" /></a></div></div></div>';
+
+  var signature = '<div></div><div style="width: 100%; display: inline-block; margin: 0px 0px 0px 0px;"><div style="padding: 5px 0px 0px 20px;"><p style="float: left; font-family: \'arial\' , sans-serif; margin: 0px 5px 0px 0px;"><a href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"><img src="/home/' + loginZimbra + '/Briefcase/logo_sc_stronik.png" dfsrc="doc:Briefcase/logo_sc_stronik.png" alt="SIGMA Clermont et Sigmatronik" width="310" style="height: auto; display: block;"/></a></p><p style="float: left; font-family: \'arial\' , sans-serif; margin: 0px 0px 0px 20px; border-left: 3px solid #347c40; padding: 0px 0px 0px 10px;"><span id="templateWebNomPrenom" style="font-size: 10pt; color: #347c40; font-weight: bold;">'
+  + nom + '</span><br /><span id="templateWebDetail1" style="font-size: 10pt; color: #1e2d46; font-weight: bold;">'
+  + detail1 + '</span><br /><span id="templateWebDetail3" style="font-size: 10pt; color: #1e2d46; font-weight: bold;">'
+  + detail2 + '</span><br /><span id="templateWebTelephone" style="font-size: 10pt; color: #1e2d46; font-weight: bold;">'
+  + telephone + '</span><br /><br /><a style="font-size: 10pt; text-decoration: none; color: #347c40;" href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"><strong>SIGMA Clermont</strong></a><br /><span style="font-size: 10pt;">20 avenue Blaise Pascal TSA 62006 63178 AUBIERE Cedex</span><br /><span style="font-size: 10pt;">&Eacute;cole affili&eacute;e &agrave; l\'Institut des Mines Telecom</span><br /><br /><a href="https://x.com/SigmaClermont" rel="nofollow noopener noreferrer" target="_blank"><img src="/home/' + loginZimbra + '/Briefcase/x.png" dfsrc="doc:Briefcase/x.png" alt="X ou Twitter" style="margin: 5px;" width="35" height="35" /></a><a href="https://www.facebook.com/SigmaClermont" rel="nofollow noopener noreferrer" target="_blank"><img src="/home/' + loginZimbra + '/Briefcase/facebook.png" dfsrc="doc:Briefcase/facebook.png" alt="Facebook" style="margin: 5px;" width="35" height="35" /></a><a href="https://www.linkedin.com/school/15129626" rel="nofollow noopener noreferrer" target="_blank"><img src="/home/' + loginZimbra + '/Briefcase/linkedin.png" dfsrc="doc:Briefcase/linkedin.png" alt="LinkedIn" style="margin: 5px;" width="35" height="35" /></a></p></div></div><div></div>';
+
+  // var signature = '<div></div><div style="width: 100%; display: inline-block; margin: 0px 0px 0px 0px;"><div style="padding: 5px 0px 0px 20px;"><p style="float: left; font-family: \'arial\' , sans-serif; margin: 0px 5px 0px 0px;"><a href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"> <img src="/home/' + loginZimbra + '/Briefcase/logo-sr.png" dfsrc="doc:Briefcase/logo-sr.png" alt="SIGMA Racing" style="height: 80px;" /> </a></p><p style="float: left; font-family: \'arial\' , \'helvetica\' , sans-serif; margin: 0px 0px 0px 20px;"><img src="/home/' + loginZimbra + '/Briefcase/ligne-separatrice.png" dfsrc="doc:Briefcase/ligne-separatrice.png" style="height: 100%; padding: 0px 0px 0px 20px; margin-right: 40px;" /></p><div style="padding: 5px 0px 0px 20px;"><span id="templateWebNomPrenom" style="font-size: 11pt; color: #b50000; font-weight: bold;">' 
+  // + nom + '</span><br /><span id="templateWebDetail1" style="font-size: 11pt; color: #202020; font-weight: bold;">' 
+  // + detail1 + '</span><br /><span id="templateWebDetail3" style="font-size: 11pt; color: #202020; font-weight: bold;">' 
+  // + detail2 + '</span><br /><span id="templateWebTelephone" style="font-size: 11pt; color: #202020; font-weight: bold;">' 
+  // + telephone + '</span><br /><br /><a style="font-size: 11pt; text-decoration: none; color: #b50000;" href="https://www.sigma-clermont.fr" rel="nofollow noopener noreferrer" target="_blank"> <strong>SIGMA Racing</strong> </a><br /><span style="font-size: 11pt;"> 20 avenue Blaise Pascal TSA 62006 63178 AUBIERE Cedex </span><br /><br /><a href="https://www.instagram.com/ecurie_sigmaracing/" rel="nofollow noopener noreferrer" target="_blank"> <img src="/home/' + loginZimbra + '/Briefcase/instagram-sr.png" dfsrc="doc:Briefcase/instagram-sr.png" alt="Instagram" style="margin: 5px;" /> </a><a href="https://www.facebook.com/sigmaracing1" rel="nofollow noopener noreferrer" target="_blank"> <img src="/home/' + loginZimbra + '/Briefcase/facebook-sr.png" dfsrc="doc:Briefcase/facebook-sr.png" alt="Facebook" style="margin: 5px;" /> </a><a href="https://www.linkedin.com/company/sigma-racing/" rel="nofollow noopener noreferrer" target="_blank"> <img src="/home/' + loginZimbra + '/Briefcase/linkedin-sr.png" dfsrc="doc:Briefcase/linkedin-sr.png" alt="LinkedIn" style="margin: 5px;" /></a></div></div></div>';
+
+  document.getElementById("signature").innerHTML = signaturePreview;
+  document.getElementById("htmlCode").value = signature;
+}
+
+function copierSignature() {
+  var copyText = document.createElement('textarea');
+  copyText.value = document.getElementById("htmlCode").value;
+  document.body.appendChild(copyText);
+  copyText.select();
+  document.execCommand("copy");
+  document.body.removeChild(copyText);
+
+  document.getElementById("copyButton").innerHTML = "Copié";
+
+  // Réinitialiser le bouton à "Copier" après 5 secondes
+  setTimeout(function() {
+    document.getElementById("copyButton").innerHTML = "Copier";
+  }, 5000);
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<!-- <script src="https://cdn.rawgit.com/michalsnik/aos/2.1.1/dist/aos.js"></script> -->
+<script src="../scripts/main.js"></script>
+
+<!--inutile mais rigolo-->
+<div class="m-5">
+<body style="overflow-x: hidden; ">
+  <object class="canvas"type="image/svg+xml" data="./logo-3/0000-0025.svg">Votre navigateur ne supporte pas SVG</object>
+<canvas class="canvas"></canvas>
+</div>
+</div>
+
+<footer class="ms-5">
+  <p>Albinks 2025</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha512-onMTRKJBKz8M1TnqqDuGBlowlH0ohFzMXYRNebz+yOcc5TQr/zAKsthzhuv0hiyUKEiQEQXEynnXCvNTOk50dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="./app.js"></script>
+
+</body>
+</html>

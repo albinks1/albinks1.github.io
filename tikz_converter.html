@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Grille de Dessin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="tikz_converter/tikz_converter_style.css" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex: 1;
+        }
+        footer {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand ms-5" href="#">
+                <img src="images/logo_albinks.png" width="40" height="40" class="d-inline-block align-top" alt="Logo">
+                Albinks
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-primary" href="tikz_converter.html">Tikz</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-secondary" href="signature.html">Signature</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="toolbar" class="btn-group" role="group">
+            <button type="button" class="btn btn-primary" id="rectangle-icon">
+                <i class="bi bi-square"></i>
+            </button>
+            <button type="button" class="btn btn-primary" id="line-icon">
+                <i class="bi bi-slash-lg"></i>
+            </button>
+            <button type="button" class="btn btn-primary" id="circle-icon">
+                <i class="bi bi-circle"></i>
+            </button>
+            <button type="button" class="btn btn-primary" id="point-icon">
+                <i class="bi bi-dot"></i>
+            </button>
+            <button type="button" class="btn btn-secondary" id="export-button">
+                <i class="bi bi-clipboard"></i>
+            </button>
+            <button type="button" class="btn btn-danger" id="reset-button">
+                <i class="bi bi-x-circle"></i>
+            </button>
+            <button type="button" class="btn btn-warning" id="undo-button">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+            <div class="btn-group">
+                <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-file-earmark"></i> Format
+                </button>
+                <ul class="dropdown-menu">
+                    <li><button class="dropdown-item" id="a3-button">A3</button></li>
+                    <li><button class="dropdown-item" id="a4-button">A4</button></li>
+                    <li><button class="dropdown-item" id="a5-button">A5</button></li>
+                    <li><button class="dropdown-item" id="usletter-button">US Letter</button></li>
+                    <li><button class="dropdown-item" id="uslegal-button">US Legal</button></li>
+                    <li><button class="dropdown-item" id="ustab-button">US Tabloid</button></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="canvas" width="500" height="500"></canvas>
+            </div>
+            <div class="col-md-6">
+                <textarea id="tikz-code" class="border p-2" rows="20" style="width: 100%;"></textarea>
+            </div>
+        </div>
+    </main>
+
+    <footer class="ms-5">
+        <p>Albinks 2025</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="tikz_converter/tikz_converter_script.js"></script>
+</body>
+</html>
