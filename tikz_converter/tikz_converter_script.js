@@ -26,6 +26,9 @@ let tikzCommands = [];
 let paperSize = 'a4paper';
 let gridSize = 20;
 
+// Augmenter légèrement la largeur du canvas
+canvas.width = 600;
+
 rectangleIcon.addEventListener('click', () => {
     currentTool = 'rectangle';
 });
@@ -56,7 +59,7 @@ canvas.addEventListener('mousemove', (e) => {
         const endY = snapToGrid(e.offsetY);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid();
-        drawShapes();
+        drawShapes(); // Redessiner toutes les formes
         ctx.strokeStyle = 'black';
         if (currentTool === 'rectangle') {
             ctx.strokeRect(startX, startY, endX - startX, endY - startY);
@@ -79,7 +82,7 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mouseup', (e) => {
-    if (drawing && currentTool) {
+    if (drawing && currentTool) { //Le rectangle plat est une ligne
         drawing = false;
         const endX = snapToGrid(e.offsetX);
         const endY = snapToGrid(e.offsetY);
@@ -110,6 +113,9 @@ canvas.addEventListener('mouseup', (e) => {
         }
         tikzCommands.push(tikzCommand);
         updateTikzCode();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+        drawShapes(); // Redessiner toutes les formes
     }
 });
 
@@ -200,27 +206,7 @@ usTabButton.addEventListener('click', () => {
     updateTikzCode();
 });
 
-function updateTikzCode() {
-    const tikzCode = `\\begin{tikzpicture}\n${tikzCommands.join('')}\\end{tikzpicture}`;
-    tikzCodeTextarea.value = tikzCode;
-}
-
-function drawGrid() {
-    ctx.strokeStyle = '#e0e0e0';
-    for (let x = 0; x <= canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-    }
-    for (let y = 0; y <= canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-}
-
+// Fonction pour dessiner toutes les formes
 function drawShapes() {
     rectangles.forEach(rect => {
         ctx.strokeStyle = 'black';
@@ -247,8 +233,51 @@ function drawShapes() {
     });
 }
 
+// Fonction pour arrondir à 0.5
+function roundToHalf(value) {
+    return Math.round(value * 2) / 2;
+}
+
+// Mettre à jour la fonction pour générer le code TikZ avec des coordonnées arrondies
+function updateTikzCode() {
+    const tikzCode = `\\begin{tikzpicture}\n${tikzCommands.map(command => {
+        return command.replace(/(\d+\.\d+)/g, (match) => roundToHalf(parseFloat(match)).toFixed(1));
+    }).join('')}\\end{tikzpicture}`;
+    tikzCodeTextarea.value = tikzCode;
+}
+
+function drawGrid() {
+    ctx.strokeStyle = '#e0e0e0';
+    for (let x = 0; x <= canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+        // Demi-unités en pointillés
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(x + gridSize / 2, 0);
+        ctx.lineTo(x + gridSize / 2, canvas.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    for (let y = 0; y <= canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+        // Demi-unités en pointillés
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(0, y + gridSize / 2);
+        ctx.lineTo(canvas.width, y + gridSize / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
 function snapToGrid(value) {
-    return Math.round(value / gridSize) * gridSize;
+    return Math.round(value / (gridSize / 2)) * (gridSize / 2);
 }
 
 // Dessiner la grille initiale
@@ -258,4 +287,3 @@ drawGrid();
 tikzCodeTextarea.addEventListener('input', () => {
     tikzCommands = tikzCodeTextarea.value.split('\n').filter(line => line.trim() !== '');
 });
-
