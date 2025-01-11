@@ -137,36 +137,36 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mouseup', (e) => {
-    if (drawing && currentTool) { //Le rectangle plat est une ligne
+    if (drawing && currentTool) {
         drawing = false;
         const endX = snapToGrid(e.offsetX);
         const endY = snapToGrid(e.offsetY);
         let tikzCommand = '';
         if (currentTool === 'rectangle') {
             if (startX === endX && startY === endY) {
-                tikzCommand = `\\fill (${startX / gridSize},${startY / gridSize}) circle (2pt);\n`;
+                tikzCommand = `\\fill (${startX / gridSize},-${startY / gridSize}) circle (2pt);\n`;
             } else if (startX === endX || startY === endY) {
-                tikzCommand = `\\draw (${startX / gridSize},${startY / gridSize}) -- (${endX / gridSize},${endY / gridSize});\n`;
+                tikzCommand = `\\draw (${startX / gridSize},-${startY / gridSize}) -- (${endX / gridSize},-${endY / gridSize});\n`;
             } else {
-                tikzCommand = `\\draw (${startX / gridSize},${startY / gridSize}) rectangle (${endX / gridSize},${endY / gridSize});\n`;
+                tikzCommand = `\\draw (${startX / gridSize},-${startY / gridSize}) rectangle (${endX / gridSize},-${endY / gridSize});\n`;
                 rectangles.push({ startX, startY, width: endX - startX, height: endY - startY });
             }
         } else if (currentTool === 'polygon' && !isDrawingPolygon) {
             if (currentPolygon.length === 1) {
-                tikzCommand = `\\fill (${currentPolygon[0].x / gridSize},${currentPolygon[0].y / gridSize}) circle (2pt);\n`;
+                tikzCommand = `\\fill (${currentPolygon[0].x / gridSize},-${currentPolygon[0].y / gridSize}) circle (2pt);\n`;
             } else if (currentPolygon.length === 2) {
-                tikzCommand = `\\draw (${currentPolygon[0].x / gridSize},${currentPolygon[0].y / gridSize}) -- (${currentPolygon[1].x / gridSize},${currentPolygon[1].y / gridSize});\n`;
+                tikzCommand = `\\draw (${currentPolygon[0].x / gridSize},-${currentPolygon[0].y / gridSize}) -- (${currentPolygon[1].x / gridSize},-${currentPolygon[1].y / gridSize});\n`;
             } else {
                 let tikzCommand = '\\draw ';
                 currentPolygon.forEach((point, index) => {
-                    tikzCommand += `(${point.x / gridSize},${point.y / gridSize})`;
+                    tikzCommand += `(${point.x / gridSize},-${point.y / gridSize})`;
                     if (index < currentPolygon.length - 1) {
                         tikzCommand += ' -- ';
                     }
                 });
                 tikzCommand += ';\n';
                 tikzCommands.push(tikzCommand);
-                polygons.push([...currentPolygon]); // Ajouter le polygone à la liste des polygones
+                polygons.push([...currentPolygon]);
             }
             updateTikzCode();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -175,21 +175,21 @@ canvas.addEventListener('mouseup', (e) => {
             currentPolygon = [];
         } else if (currentTool === 'circle') {
             if (startX === endX && startY === endY) {
-                tikzCommand = `\\fill (${startX / gridSize},${startY / gridSize}) circle (2pt);\n`;
+                tikzCommand = `\\fill (${startX / gridSize},-${startY / gridSize}) circle (2pt);\n`;
             } else {
                 const radius = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)) / gridSize;
-                tikzCommand = `\\draw (${startX / gridSize},${startY / gridSize}) circle (${radius});\n`;
+                tikzCommand = `\\draw (${startX / gridSize},-${startY / gridSize}) circle (${radius});\n`;
                 circles.push({ startX, startY, radius });
             }
         } else if (currentTool === 'point') {
-            tikzCommand = `\\fill (${startX / gridSize},${startY / gridSize}) circle (2pt);\n`;
+            tikzCommand = `\\fill (${startX / gridSize},-${startY / gridSize}) circle (2pt);\n`;
             points.push({ startX, startY });
         }
         tikzCommands.push(tikzCommand);
         updateTikzCode();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid();
-        drawShapes(); // Redessiner toutes les formes
+        drawShapes();
     }
 });
 
@@ -197,14 +197,14 @@ canvas.addEventListener('dblclick', (e) => {
     if (currentTool === 'polygon' && isDrawingPolygon) {
         isDrawingPolygon = false;
         if (currentPolygon.length === 1) {
-            tikzCommands.push(`\\fill (${currentPolygon[0].x / gridSize},${currentPolygon[0].y / gridSize}) circle (2pt);\n`);
+            tikzCommands.push(`\\fill (${currentPolygon[0].x / gridSize},-${currentPolygon[0].y / gridSize}) circle (2pt);\n`);
         } else if (currentPolygon.length === 2) {
-            tikzCommands.push(`\\draw (${currentPolygon[0].x / gridSize},${currentPolygon[0].y / gridSize}) -- (${currentPolygon[1].x / gridSize},${currentPolygon[1].y / gridSize});\n`);
+            tikzCommands.push(`\\draw (${currentPolygon[0].x / gridSize},-${currentPolygon[0].y / gridSize}) -- (${currentPolygon[1].x / gridSize},-${currentPolygon[1].y / gridSize});\n`);
         } else {
             currentPolygon.pop(); // Retirer le dernier point ajouté
             let tikzCommand = '\\draw ';
             currentPolygon.forEach((point, index) => {
-                tikzCommand += `(${point.x / gridSize},${point.y / gridSize})`;
+                tikzCommand += `(${point.x / gridSize},-${point.y / gridSize})`;
                 if (index < currentPolygon.length - 1) {
                     tikzCommand += ' -- ';
                 }
@@ -324,14 +324,7 @@ function drawShapes() {
         ctx.strokeStyle = 'black';
         ctx.strokeRect(rect.startX, rect.startY, rect.width, rect.height);
     });
-    // lines.forEach(line => {
-    //     ctx.strokeStyle = 'black';
-    //     ctx.beginPath();
-    //     ctx.moveTo(line.startX, line.startY);
-    //     ctx.lineTo(line.endX, line.endY);
-    //     ctx.stroke();
-    // });
-    circles.forEach(circle => {
+     circles.forEach(circle => {
         ctx.strokeStyle = 'black';
         ctx.beginPath();
         ctx.arc(circle.startX, circle.startY, circle.radius * gridSize, 0, 2 * Math.PI);
@@ -374,7 +367,8 @@ function roundToHalf(value) {
 // Mettre à jour la fonction pour générer le code TikZ avec des coordonnées arrondies
 function updateTikzCode() {
     const tikzCode = `\\begin{tikzpicture}\n${tikzCommands.map(command => {
-        return command.replace(/(\d+\.\d+)/g, (match) => roundToHalf(parseFloat(match)).toFixed(1));
+        return command.replace(/(\d+\.\d+)/g, (match) => roundToHalf(parseFloat(match)).toFixed(1))
+                      .replace(/(\(\d+(\.\d+)?,)(\d+(\.\d+)?\))/g, (match, p1, p2, p3) => `${p1}-${p3}`);
     }).join('')}\\end{tikzpicture}`;
     tikzCodeTextarea.value = tikzCode;
 }
