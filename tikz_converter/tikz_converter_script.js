@@ -209,7 +209,14 @@ canvas.addEventListener('dblclick', (e) => {
                     tikzCommand += ' -- ';
                 }
             });
-            tikzCommand += ';\n';
+            // Vérifier si le polygone est fermé
+            if (currentPolygon[0].x === currentPolygon[currentPolygon.length - 1].x &&
+                currentPolygon[0].y === currentPolygon[currentPolygon.length - 1].y) {
+                tikzCommand = tikzCommand.replace(/ -- \(\d+(\.\d+)?,\d+(\.\d+)?\)$/, ''); // Retirer la dernière coordonnée
+                tikzCommand += ' -- cycle;\n';
+            } else {
+                tikzCommand += ';\n';
+            }
             tikzCommands.push(tikzCommand);
             polygons.push([...currentPolygon]); // Ajouter le polygone terminé à la liste
         }
