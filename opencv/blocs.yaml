@@ -1,0 +1,59 @@
+- titre: Charger et afficher une image
+  tags: [io]
+  consigne: Lire input.jpg, l'afficher dans une fenêtre, attendre une touche, puis fermer les fenêtres.
+  code: |
+    import cv2
+    img = cv2.imread('../images/input.jpg')
+    cv2.imshow('image', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+  fonctions:
+    - sig: cv2.imread(filename, flags=cv2.IMREAD_COLOR)
+      desc: Lit une image en BGR (uint8). Renvoie None si le fichier est introuvable.
+    - sig: cv2.imshow(winname, mat)
+      desc: Affiche mat dans la fenêtre winname. Sans waitKey, la fenêtre ne se rafraîchit pas.
+    - sig: cv2.waitKey(delay=0)
+      desc: Attend une touche pendant delay ms (0 = indéfiniment). Renvoie le code de la touche.
+    - sig: cv2.destroyAllWindows()
+      desc: Ferme toutes les fenêtres OpenCV.
+
+- titre: Convertir en niveaux de gris
+  tags: [couleur]
+  consigne: Convertir l'image chargée en niveaux de gris et l'afficher.
+  code: |
+    import cv2
+    img = cv2.imread('../images/input.jpg')
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('gray', gray)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+  fonctions:
+    - sig: cv2.cvtColor(src, code)
+      desc: Convertit l'espace colorimétrique selon code (ici COLOR_BGR2GRAY). OpenCV charge en BGR, pas en RGB.
+
+- titre: Enregistrer une image
+  tags: [io]
+  consigne: Enregistrer l'image en niveaux de gris dans output.png.
+  code: |
+    import cv2
+    img = cv2.imread('../images/input.jpg')
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite('output.png', gray)
+  fonctions:
+    - sig: cv2.imwrite(filename, img, params=None)
+      desc: Écrit img sur disque, le format est déduit de l'extension. Renvoie True si l'écriture a réussi.
+
+- titre: Redimensionner une image
+  tags: [géométrie]
+  consigne: Réduire l'image de moitié et afficher ses dimensions avant et après.
+  code: |
+    import cv2
+    img = cv2.imread('../images/input.jpg')
+    print(img.shape)
+    small = cv2.resize(img, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+    print(small.shape)
+  fonctions:
+    - sig: img.shape
+      desc: Tuple (hauteur, largeur, canaux). Attention, dsize de resize est dans l'ordre inverse (largeur, hauteur).
+    - sig: cv2.resize(src, dsize, fx, fy, interpolation)
+      desc: Redimensionne. Soit dsize=(largeur, hauteur), soit dsize=None avec les facteurs fx, fy. INTER_AREA convient pour réduire, INTER_LINEAR ou INTER_CUBIC pour agrandir.

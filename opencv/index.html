@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenCV : blocs usuels</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem;color:#222}
+h1{font-size:1.5rem}h2{font-size:1.15rem;margin:0}
+section{border-top:1px solid #ddd;padding:1rem 0}
+.tags{margin:.2rem 0;color:#777;font-size:.85rem}
+input{width:100%;padding:.5rem;font-size:1rem;box-sizing:border-box}
+button{margin:.5rem .3rem 0 0;padding:.25rem .7rem;border:1px solid #bbb;background:#fff;cursor:pointer}
+button.on{background:#222;color:#fff}
+summary{cursor:pointer;margin:.4rem 0}
+pre{background:#f5f5f5;padding:.8rem;overflow-x:auto}
+code{font-family:ui-monospace,monospace;font-size:.9rem}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#ddd}section{border-color:#333}pre{background:#222}input,button{background:#222;color:#ddd;border-color:#444}button.on{background:#ddd;color:#161616}}
+</style></head><body>
+<h1>OpenCV : blocs usuels</h1>
+<input id="q" placeholder="Rechercher (consigne, fonction, tag)">
+<div id="tags"><button data-t="couleur">couleur</button><button data-t="géométrie">géométrie</button><button data-t="io">io</button></div>
+<section data-tags="io">
+<h2>Charger et afficher une image</h2>
+<p class="tags">io</p>
+<p>Lire input.jpg, l&#x27;afficher dans une fenêtre, attendre une touche, puis fermer les fenêtres.</p>
+<details><summary>Solution</summary><pre><code>import cv2
+img = cv2.imread(&#x27;../images/input.jpg&#x27;)
+cv2.imshow(&#x27;image&#x27;, img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()</code></pre></details>
+<details><summary>Fonctions</summary><ul><li><code>cv2.imread(filename, flags=cv2.IMREAD_COLOR)</code> : Lit une image en BGR (uint8). Renvoie None si le fichier est introuvable.</li><li><code>cv2.imshow(winname, mat)</code> : Affiche mat dans la fenêtre winname. Sans waitKey, la fenêtre ne se rafraîchit pas.</li><li><code>cv2.waitKey(delay=0)</code> : Attend une touche pendant delay ms (0 = indéfiniment). Renvoie le code de la touche.</li><li><code>cv2.destroyAllWindows()</code> : Ferme toutes les fenêtres OpenCV.</li></ul></details>
+</section><section data-tags="couleur">
+<h2>Convertir en niveaux de gris</h2>
+<p class="tags">couleur</p>
+<p>Convertir l&#x27;image chargée en niveaux de gris et l&#x27;afficher.</p>
+<details><summary>Solution</summary><pre><code>import cv2
+img = cv2.imread(&#x27;../images/input.jpg&#x27;)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+cv2.imshow(&#x27;gray&#x27;, gray)
+cv2.waitKey(0)
+cv2.destroyAllWindows()</code></pre></details>
+<details><summary>Fonctions</summary><ul><li><code>cv2.cvtColor(src, code)</code> : Convertit l&#x27;espace colorimétrique selon code (ici COLOR_BGR2GRAY). OpenCV charge en BGR, pas en RGB.</li></ul></details>
+</section><section data-tags="io">
+<h2>Enregistrer une image</h2>
+<p class="tags">io</p>
+<p>Enregistrer l&#x27;image en niveaux de gris dans output.png.</p>
+<details><summary>Solution</summary><pre><code>import cv2
+img = cv2.imread(&#x27;../images/input.jpg&#x27;)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+cv2.imwrite(&#x27;output.png&#x27;, gray)</code></pre></details>
+<details><summary>Fonctions</summary><ul><li><code>cv2.imwrite(filename, img, params=None)</code> : Écrit img sur disque, le format est déduit de l&#x27;extension. Renvoie True si l&#x27;écriture a réussi.</li></ul></details>
+</section><section data-tags="géométrie">
+<h2>Redimensionner une image</h2>
+<p class="tags">géométrie</p>
+<p>Réduire l&#x27;image de moitié et afficher ses dimensions avant et après.</p>
+<details><summary>Solution</summary><pre><code>import cv2
+img = cv2.imread(&#x27;../images/input.jpg&#x27;)
+print(img.shape)
+small = cv2.resize(img, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+print(small.shape)</code></pre></details>
+<details><summary>Fonctions</summary><ul><li><code>img.shape</code> : Tuple (hauteur, largeur, canaux). Attention, dsize de resize est dans l&#x27;ordre inverse (largeur, hauteur).</li><li><code>cv2.resize(src, dsize, fx, fy, interpolation)</code> : Redimensionne. Soit dsize=(largeur, hauteur), soit dsize=None avec les facteurs fx, fy. INTER_AREA convient pour réduire, INTER_LINEAR ou INTER_CUBIC pour agrandir.</li></ul></details>
+</section>
+<script>
+const S=[...document.querySelectorAll('section')];let tag='';
+function f(){const q=document.getElementById('q').value.toLowerCase();
+S.forEach(s=>s.hidden=!(s.textContent.toLowerCase().includes(q)&&(!tag||s.dataset.tags.split(' ').includes(tag))))}
+document.getElementById('q').oninput=f;
+document.querySelectorAll('#tags button').forEach(b=>b.onclick=()=>{tag=tag===b.dataset.t?'':b.dataset.t;
+document.querySelectorAll('#tags button').forEach(x=>x.classList.toggle('on',x.dataset.t===tag));f()});
+</script></body></html>
