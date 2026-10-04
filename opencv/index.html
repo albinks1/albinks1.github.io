@@ -6,20 +6,29 @@ body{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:2rem auto;padding
 h1{font-size:1.5rem}h2{font-size:1.15rem;margin:0}
 section{border-top:1px solid #ddd;padding:1rem 0}
 .tags{margin:.2rem 0;color:#777;font-size:.85rem}
-input{width:100%;padding:.5rem;font-size:1rem;box-sizing:border-box}
-button{margin:.5rem .3rem 0 0;padding:.25rem .7rem;border:1px solid #bbb;background:#fff;cursor:pointer}
+input[type=text]{width:100%;padding:.5rem;font-size:1rem;box-sizing:border-box}
+button,label.b{margin:.5rem .3rem 0 0;padding:.25rem .7rem;border:1px solid #bbb;background:#fff;color:inherit;cursor:pointer;font-size:.9rem;display:inline-block}
 button.on{background:#222;color:#fff}
 summary{cursor:pointer;margin:.4rem 0}
 pre{background:#f5f5f5;padding:.8rem;overflow-x:auto}
 code{font-family:ui-monospace,monospace;font-size:.9rem}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#ddd}section{border-color:#333}pre{background:#222}input,button{background:#222;color:#ddd;border-color:#444}button.on{background:#ddd;color:#161616}}
+.st{font-size:.85rem;color:#555;margin:.2rem 0 .6rem}
+.sq i{display:inline-block;width:.7rem;height:.7rem;border:1px solid #888;margin-right:2px}
+.sq i.on{background:#2a7;border-color:#2a7}
+#stats{margin:1rem 0 .5rem;font-size:.9rem}
+.bar{height:6px;background:#ddd;margin-top:.4rem}.bar div{height:100%;background:#2a7}
+.btns{font-size:.9rem;margin-top:.6rem}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#ddd}section{border-color:#333}pre{background:#222}.st{color:#aaa}.bar{background:#333}input[type=text],button,label.b{background:#222;color:#ddd;border-color:#444}button.on{background:#ddd;color:#161616}}
 </style></head><body>
 <h1>OpenCV : blocs usuels</h1>
-<input id="q" placeholder="Rechercher (consigne, fonction, tag)">
+<div id="stats"></div>
+<input id="q" type="text" placeholder="Rechercher (consigne, fonction, tag)">
 <div id="tags"><button data-t="couleur">couleur</button><button data-t="géométrie">géométrie</button><button data-t="io">io</button></div>
-<section data-tags="io">
+<div id="tools"><button id="dueb">À revoir</button><button id="exp">Exporter</button><label class="b">Importer<input id="imp" type="file" accept=".json" hidden></label></div>
+<section id="charger-et-afficher-une-image" data-tags="io">
 <h2>Charger et afficher une image</h2>
 <p class="tags">io</p>
+<div class="st"></div>
 <p>Lire input.jpg, l&#x27;afficher dans une fenêtre, attendre une touche, puis fermer les fenêtres.</p>
 <details><summary>Solution</summary><pre><code>import cv2
 img = cv2.imread(&#x27;../images/input.jpg&#x27;)
@@ -27,9 +36,11 @@ cv2.imshow(&#x27;image&#x27;, img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()</code></pre></details>
 <details><summary>Fonctions</summary><ul><li><code>cv2.imread(filename, flags=cv2.IMREAD_COLOR)</code> : Lit une image en BGR (uint8). Renvoie None si le fichier est introuvable.</li><li><code>cv2.imshow(winname, mat)</code> : Affiche mat dans la fenêtre winname. Sans waitKey, la fenêtre ne se rafraîchit pas.</li><li><code>cv2.waitKey(delay=0)</code> : Attend une touche pendant delay ms (0 = indéfiniment). Renvoie le code de la touche.</li><li><code>cv2.destroyAllWindows()</code> : Ferme toutes les fenêtres OpenCV.</li></ul></details>
-</section><section data-tags="couleur">
+<div class="btns">Je savais le refaire : <button data-r="0">Non</button><button data-r="1">Avec hésitation</button><button data-r="2">Oui</button></div>
+</section><section id="convertir-en-niveaux-de-gris" data-tags="couleur">
 <h2>Convertir en niveaux de gris</h2>
 <p class="tags">couleur</p>
+<div class="st"></div>
 <p>Convertir l&#x27;image chargée en niveaux de gris et l&#x27;afficher.</p>
 <details><summary>Solution</summary><pre><code>import cv2
 img = cv2.imread(&#x27;../images/input.jpg&#x27;)
@@ -38,18 +49,22 @@ cv2.imshow(&#x27;gray&#x27;, gray)
 cv2.waitKey(0)
 cv2.destroyAllWindows()</code></pre></details>
 <details><summary>Fonctions</summary><ul><li><code>cv2.cvtColor(src, code)</code> : Convertit l&#x27;espace colorimétrique selon code (ici COLOR_BGR2GRAY). OpenCV charge en BGR, pas en RGB.</li></ul></details>
-</section><section data-tags="io">
+<div class="btns">Je savais le refaire : <button data-r="0">Non</button><button data-r="1">Avec hésitation</button><button data-r="2">Oui</button></div>
+</section><section id="enregistrer-une-image" data-tags="io">
 <h2>Enregistrer une image</h2>
 <p class="tags">io</p>
+<div class="st"></div>
 <p>Enregistrer l&#x27;image en niveaux de gris dans output.png.</p>
 <details><summary>Solution</summary><pre><code>import cv2
 img = cv2.imread(&#x27;../images/input.jpg&#x27;)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 cv2.imwrite(&#x27;output.png&#x27;, gray)</code></pre></details>
 <details><summary>Fonctions</summary><ul><li><code>cv2.imwrite(filename, img, params=None)</code> : Écrit img sur disque, le format est déduit de l&#x27;extension. Renvoie True si l&#x27;écriture a réussi.</li></ul></details>
-</section><section data-tags="géométrie">
+<div class="btns">Je savais le refaire : <button data-r="0">Non</button><button data-r="1">Avec hésitation</button><button data-r="2">Oui</button></div>
+</section><section id="redimensionner-une-image" data-tags="géométrie">
 <h2>Redimensionner une image</h2>
 <p class="tags">géométrie</p>
+<div class="st"></div>
 <p>Réduire l&#x27;image de moitié et afficher ses dimensions avant et après.</p>
 <details><summary>Solution</summary><pre><code>import cv2
 img = cv2.imread(&#x27;../images/input.jpg&#x27;)
@@ -57,12 +72,30 @@ print(img.shape)
 small = cv2.resize(img, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
 print(small.shape)</code></pre></details>
 <details><summary>Fonctions</summary><ul><li><code>img.shape</code> : Tuple (hauteur, largeur, canaux). Attention, dsize de resize est dans l&#x27;ordre inverse (largeur, hauteur).</li><li><code>cv2.resize(src, dsize, fx, fy, interpolation)</code> : Redimensionne. Soit dsize=(largeur, hauteur), soit dsize=None avec les facteurs fx, fy. INTER_AREA convient pour réduire, INTER_LINEAR ou INTER_CUBIC pour agrandir.</li></ul></details>
+<div class="btns">Je savais le refaire : <button data-r="0">Non</button><button data-r="1">Avec hésitation</button><button data-r="2">Oui</button></div>
 </section>
 <script>
-const S=[...document.querySelectorAll('section')];let tag='';
+const K='opencv-progress',IV=[0,1,3,7,14,30],D=864e5;
+let P={};try{P=JSON.parse(localStorage.getItem(K))||{}}catch(x){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(P))}catch(x){}};
+const S=[...document.querySelectorAll('section')];
+let tag='',dueOnly=false;
+const lvl=s=>(P[s.id]||{}).l||0;
+const due=s=>{const p=P[s.id];return !p||Date.now()>=p.t+IV[p.l]*D};
+const ago=t=>{const d=Math.floor((Date.now()-t)/D);return d<1?"aujourd'hui":d==1?'hier':'il y a '+d+' j'};
+function draw(s){const p=P[s.id],l=lvl(s);
+s.querySelector('.st').innerHTML='<span class="sq">'+[1,2,3,4,5].map(i=>'<i class="'+(i<=l?'on':'')+'"></i>').join('')+'</span> '+(p?'revu '+ago(p.t)+', '+p.n+' fois':'jamais revu')+(due(s)?' · <b>à revoir</b>':'')}
+function stats(){const n=S.length,m=S.filter(s=>lvl(s)>=4).length,d=S.filter(due).length,t=S.reduce((a,s)=>a+lvl(s),0);
+document.getElementById('stats').innerHTML=m+' / '+n+' maîtrisés (niveau 4 et plus) · '+d+' à revoir<div class="bar"><div style="width:'+100*t/(5*n)+'%"></div></div>'}
 function f(){const q=document.getElementById('q').value.toLowerCase();
-S.forEach(s=>s.hidden=!(s.textContent.toLowerCase().includes(q)&&(!tag||s.dataset.tags.split(' ').includes(tag))))}
+S.forEach(s=>s.hidden=!(s.textContent.toLowerCase().includes(q)&&(!tag||s.dataset.tags.split(' ').includes(tag))&&(!dueOnly||due(s))))}
+S.forEach(s=>s.querySelector('.btns').onclick=ev=>{const r=ev.target.dataset.r;if(r===undefined)return;
+const p=P[s.id]||{l:0,n:0};p.l=r=='0'?0:r=='1'?p.l:Math.min(5,p.l+1);p.n++;p.t=Date.now();P[s.id]=p;save();draw(s);stats();f()});
 document.getElementById('q').oninput=f;
 document.querySelectorAll('#tags button').forEach(b=>b.onclick=()=>{tag=tag===b.dataset.t?'':b.dataset.t;
 document.querySelectorAll('#tags button').forEach(x=>x.classList.toggle('on',x.dataset.t===tag));f()});
+document.getElementById('dueb').onclick=ev=>{dueOnly=!dueOnly;ev.target.classList.toggle('on',dueOnly);f()};
+document.getElementById('exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(P)],{type:'application/json'}));a.download='opencv-progress.json';a.click()};
+document.getElementById('imp').onchange=ev=>{const r=new FileReader();r.onload=()=>{try{P=JSON.parse(r.result);save();S.forEach(draw);stats();f()}catch(x){alert('Fichier invalide')}};r.readAsText(ev.target.files[0])};
+S.forEach(draw);stats();
 </script></body></html>
