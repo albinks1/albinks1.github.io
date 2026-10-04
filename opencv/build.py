@@ -43,7 +43,7 @@ code{font-family:ui-monospace,monospace;font-size:.9rem}
 <div id="stats"></div>
 <input id="q" type="text" placeholder="Rechercher (consigne, fonction, tag)">
 <div id="tags">%%TAGS%%</div>
-<div id="tools"><button id="dueb">À revoir</button><button id="exp">Exporter</button><label class="b">Importer<input id="imp" type="file" accept=".json" hidden></label></div>
+<div id="tools"><button id="dueb">À revoir</button><button id="exp">Exporter</button><button id="rst">Réinitialiser</button><label class="b">Importer<input id="imp" type="file" accept=".json" hidden></label></div>
 %%BLOCS%%
 <script>
 const K='opencv-progress',IV=[0,1,3,7,14,30],D=864e5;
@@ -68,6 +68,7 @@ document.querySelectorAll('#tags button').forEach(x=>x.classList.toggle('on',x.d
 document.getElementById('dueb').onclick=ev=>{dueOnly=!dueOnly;ev.target.classList.toggle('on',dueOnly);f()};
 document.getElementById('exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(P)],{type:'application/json'}));a.download='opencv-progress.json';a.click()};
 document.getElementById('imp').onchange=ev=>{const r=new FileReader();r.onload=()=>{try{P=JSON.parse(r.result);save();S.forEach(draw);stats();f()}catch(x){alert('Fichier invalide')}};r.readAsText(ev.target.files[0])};
+document.getElementById('rst').onclick=()=>{if(confirm('Effacer toute la progression ?')){P={};save();S.forEach(draw);stats();f()}};
 S.forEach(draw);stats();
 </script></body></html>"""
 open('index.html', 'w', encoding='utf-8').write(T.replace('%%TAGS%%', btn).replace('%%BLOCS%%', ''.join(out)))
