@@ -161,7 +161,8 @@ function endQuestion() {
 
   $('stext').textContent = q.q;
   if (note) {   // quelle que soit la vraie moyenne...
-    $('bars').replaceChildren(el('p', 'note-big', '20/20'), el('p', 'note-txt', 'Wow ! Vous avez adoré !'));
+    $('bars').replaceChildren(el('p', 'note-txt', 'Résultats du sondage'), el('p', 'note-big', '20/20'),
+      el('p', 'note-txt muted', 'Moyenne des ' + answers.size + ' réponse(s)'));
     return show('stats');
   }
   const max = Math.max(1, ...counts);
