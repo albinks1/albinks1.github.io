@@ -177,6 +177,7 @@ function endQuestion() {
     requestAnimationFrame(() => requestAnimationFrame(() => fill.style.width = (counts[i] / max * 100) + '%'));
     return row;
   }));
+  if (q.e) $('bars').append(el('p', 'explain', q.e));
   show('stats');
 }
 
