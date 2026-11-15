@@ -46,11 +46,9 @@ const db = firebase.initializeApp(FIREBASE_CONFIG).database();
 let game, pid, myName = '', answered = -1, current;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const MSG = {
-  ok: ['Bonne réponse ! Tu pèses un max !', 'Correct ! Le cerveau est allumé.', 'Bien joué, tu es une légende.',
-    'Exact ! Les autres peuvent rentrer chez eux.', 'Bonne réponse ! Rien ne t\'arrête.'],
-  ko: ['Mauvaise réponse, c\'est lamentable...', 'Raté. On en reparlera.', 'Faux. Même la roue aurait trouvé.',
-    'Mauvaise réponse... Tu fais exprès ?', 'Non. Juste non.'],
-  none: ['Pas de réponse ? Tu dormais ?', 'Trop lent. Beaucoup trop lent.', 'Le chrono t\'a battu.']
+  ok: ['Bonne réponse.'],
+  ko: ['Mauvaise réponse, c\'est lamentable.', 'Mauvaise réponse. Vous êtes mauvais.'],
+  none: ['Aucune réponse enregistrée.']
 };
 
 function answer(data) {
@@ -140,7 +138,7 @@ function showResult(d, end) {
   if (!d) return wait(myName, 'Vous jouerez à la prochaine question.');
   const rank = 'Rang ' + d.rank + ' / ' + d.total;
   if (end) wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score);
-  else if (d.note) wait('Merci pour votre 20/20 !', 'Nous aussi on vous aime.', d.score);
+  else if (d.note) wait('Merci pour votre réponse.', 'Celle-ci a bien été enregistrée et ignorée.', d.score);
   else if (!d.answered) wait(pick(MSG.none), rank, d.score, 'ko');
   else if (d.poll) wait('Merci pour votre vote', rank, d.score);
   else if (d.ok) wait(pick(MSG.ok), '+' + d.pts + ' pts - ' + rank, d.score, 'ok');
