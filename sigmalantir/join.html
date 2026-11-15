@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
 </head>
 <body>
 <main>
@@ -36,7 +38,8 @@
 const $ = id => document.getElementById(id);
 const show = id => document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== id);
 const LETTERS = 'ABCD';
-let peer, conn, myName = '';
+const db = firebase.initializeApp(FIREBASE_CONFIG).database();
+let game, pid, myName = '', answered = -1;
 
 const code = new URLSearchParams(location.search).get('c');
 if (code) { $('code').value = code; $('name').focus(); }
@@ -54,52 +57,74 @@ function fail(msg) {
   show('login');
 }
 
-$('form').onsubmit = e => {
+// Identifiant du téléphone, conservé pour garder son score après un rechargement
+function phoneId(c) {
+  const key = 'sigmalantir-' + c, id = Math.random().toString(36).slice(2, 10);
+  try {
+    if (!localStorage.getItem(key)) localStorage.setItem(key, id);
+    return localStorage.getItem(key) || id;
+  } catch { return id; }
+}
+
+$('form').onsubmit = async e => {
   e.preventDefault();
-  myName = $('name').value.trim();
-  $('msg').textContent = 'Connexion au serveur...';
-  if (peer) peer.destroy();
-  peer = new Peer();
-  const timer = setTimeout(() => fail('Délai dépassé (' + $('msg').textContent + '). Le réseau bloque peut-être la connexion : essayez en 4G ou sur un autre Wi-Fi.'), 15000);
-  peer.on('open', () => {
-    $('msg').textContent = 'Connexion à la partie...';
-    conn = peer.connect('sigmalantir-' + $('code').value.trim(), { reliable: true });
-    conn.on('open', () => { clearTimeout(timer); conn.send({ t: 'join', name: myName }); });
-    conn.on('iceStateChanged', s => $('msg').textContent = 'Connexion à la partie... (' + s + ')');
-    conn.on('error', e => { clearTimeout(timer); fail('Erreur de connexion : ' + (e.type || e.message || e)); });
-    conn.on('data', onData);
-    conn.on('close', () => fail('Connexion perdue. Rejoignez avec le même pseudo pour garder votre score.'));
-  });
-  peer.on('error', e => clearTimeout(timer) || fail(e.type === 'peer-unavailable' ? 'Partie introuvable, vérifiez le code.' : 'Erreur : ' + e.type));
+  const c = $('code').value.trim();
+  myName = $('name').value.replace(/\s+/g, ' ').trim().slice(0, 20);
+  $('msg').textContent = 'Connexion...';
+  if (game) { game.child('state').off(); db.ref('.info/connected').off(); }
+  try {
+    game = db.ref('games/' + c);
+    if (!(await game.child('state').get()).exists()) return fail('Partie introuvable, vérifiez le code.');
+    pid = phoneId(c);
+    const me = game.child('players/' + pid);
+    await me.update({ name: myName, on: true });
+    // présence : "on" repasse à false si le téléphone se déconnecte, et à true quand il revient
+    db.ref('.info/connected').on('value', s => {
+      if (!s.val()) return;
+      me.child('on').onDisconnect().set(false);
+      me.child('on').set(true);
+    });
+    game.child('state').on('value', s => onState(s.val()));
+  } catch (err) {
+    fail('Erreur : ' + err.message);
+  }
 };
 
-function onData(d) {
-  if (d.t === 'error') fail(d.msg);
-  else if (d.t === 'joined') wait(d.name, 'Vous êtes inscrit. Regardez l\'écran.', d.score);
-  else if (d.t === 'sent') wait('Réponse envoyée', 'En attente des autres joueurs...');
-  else if (d.t === 'question') {
-    $('pnum').textContent = 'Question ' + d.n + ' / ' + d.total;
-    $('ptext').textContent = d.q;
-    $('btns').replaceChildren(...d.c.map((c, i) => {
+function onState(st) {
+  if (!st) return fail('La partie a été fermée.');
+  if (st.phase === 'lobby') wait(myName, 'Vous êtes inscrit. Regardez l\'écran.');
+  else if (st.phase === 'question') {
+    if (answered === st.n) return wait('Réponse envoyée', 'En attente des autres joueurs...');
+    $('pnum').textContent = 'Question ' + (st.n + 1) + ' / ' + st.total;
+    $('ptext').textContent = st.q;
+    $('btns').replaceChildren(...st.c.map((c, i) => {
       const b = document.createElement('button');
       b.className = 'k' + i;
       const l = document.createElement('span');
       l.className = 'letter';
       l.textContent = LETTERS[i];
       b.append(l, document.createTextNode(c));
-      b.onclick = () => { conn.send({ t: 'answer', i }); wait('Réponse envoyée', 'En attente des autres joueurs...'); };
+      b.onclick = () => {
+        answered = st.n;
+        game.child('answers/' + st.n + '/' + pid).set({ i });
+        wait('Réponse envoyée', 'En attente des autres joueurs...');
+      };
       return b;
     }));
     show('play');
-  } else if (d.t === 'result') {
-    const rank = 'Rang ' + d.rank + ' / ' + d.total;
-    if (!d.answered) wait('Pas de réponse', rank, d.score, 'ko');
-    else if (d.poll) wait('Merci pour votre vote', rank, d.score);
-    else if (d.ok) wait('Correct ! +' + d.pts, rank, d.score, 'ok');
-    else wait('Raté', rank, d.score, 'ko');
-  } else if (d.t === 'end') {
-    wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score);
+  } else {
+    game.child('results/' + pid).get().then(s => showResult(s.val(), st.phase === 'end'));
   }
+}
+
+function showResult(d, end) {
+  if (!d) return wait(myName, 'Vous jouerez à la prochaine question.');
+  const rank = 'Rang ' + d.rank + ' / ' + d.total;
+  if (end) wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score);
+  else if (!d.answered) wait('Pas de réponse', rank, d.score, 'ko');
+  else if (d.poll) wait('Merci pour votre vote', rank, d.score);
+  else if (d.ok) wait('Correct ! +' + d.pts, rank, d.score, 'ok');
+  else wait('Raté', rank, d.score, 'ko');
 }
 </script>
 <script src="anim.js"></script>
