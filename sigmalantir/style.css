@@ -135,3 +135,5 @@ input:focus { outline: none; border-color: var(--accent); }
 }
 @keyframes roule { to { transform: translateX(calc(-100vw - 100%)); } }
 @media (min-width: 900px) { :root { --roue: 70px; } }
+/* sur le téléphone, la roue disparaît pendant qu'on répond pour ne pas cacher les boutons */
+body:has(#play:not([hidden])) .mascotte { display: none; }
