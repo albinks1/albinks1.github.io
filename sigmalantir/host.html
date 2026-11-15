@@ -95,7 +95,9 @@ openRoom().catch(e => $('status').textContent = 'Erreur Firebase : ' + e.message
 function onAnswer(pid, v) {
   const p = players.get(pid), q = questions[qi];
   if (!p || phase !== 'question' || answers.has(pid)) return;
-  if (!v || !Number.isInteger(v.i) || v.i < 0 || v.i >= q.c.length) return;
+  const valid = q.type === 'note' ? v && v.n >= 0 && v.n <= 20
+    : v && Number.isInteger(v.i) && v.i >= 0 && v.i < q.c.length;
+  if (!valid) return;
   const ratio = Math.min((Date.now() - qStart) / 1000 / q.time, 1);
   const pts = 'a' in q && v.i === q.a ? Math.round(1000 * (1 - ratio / 2)) : 0;
   answers.set(pid, { i: v.i, pts });
@@ -118,13 +120,15 @@ function nextQuestion() {
   $('qnum').textContent = 'Question ' + (qi + 1) + ' / ' + questions.length;
   $('qtext').textContent = q.q;
   $('answered').textContent = '0 réponse(s)';
-  $('choices').replaceChildren(...q.c.map((c, i) => {
-    const li = el('li', 'k' + i);
-    li.append(el('span', 'letter', LETTERS[i]), el('span', null, c));
-    return li;
-  }));
+  $('choices').replaceChildren(...(q.type === 'note'
+    ? [el('li', 'k1', 'Donnez une note de 0 à 20 sur votre téléphone')]
+    : q.c.map((c, i) => {
+      const li = el('li', 'k' + i);
+      li.append(el('span', 'letter', LETTERS[i]), el('span', null, c));
+      return li;
+    })));
   show('question');
-  game.child('state').set({ phase: 'question', n: qi, total: questions.length, q: q.q, c: q.c });
+  game.child('state').set({ phase: 'question', n: qi, total: questions.length, q: q.q, c: q.c || [], type: q.type || 'choix' });
   qStart = Date.now();
   ansRef = game.child('answers/' + qi);
   ansRef.on('child_added', s => onAnswer(s.key, s.val()));
@@ -142,20 +146,24 @@ function endQuestion() {
   phase = 'stats';
   clearInterval(tick);
   ansRef.off();
-  const q = questions[qi], poll = !('a' in q);
-  const counts = q.c.map(() => 0);
-  answers.forEach((r, pid) => { counts[r.i]++; players.get(pid).score += r.pts; });
+  const q = questions[qi], poll = !('a' in q), note = q.type === 'note';
+  const counts = (q.c || []).map(() => 0);
+  answers.forEach((r, pid) => { if (!note) counts[r.i]++; players.get(pid).score += r.pts; });
   // Résultats de chaque joueur puis changement d'état, en une seule écriture
   const upd = { state: { phase: 'result', n: qi } };
   const ranks = sorted();
   ranks.forEach(([pid, p], k) => {
     const r = answers.get(pid);
-    upd['results/' + pid] = { poll, answered: !!r, ok: !poll && !!r && r.i === q.a,
+    upd['results/' + pid] = { poll, note, answered: !!r, ok: !poll && !!r && r.i === q.a,
       pts: r ? r.pts : 0, score: p.score, rank: k + 1, total: ranks.length };
   });
   game.update(upd);
 
   $('stext').textContent = q.q;
+  if (note) {   // quelle que soit la vraie moyenne...
+    $('bars').replaceChildren(el('p', 'note-big', '20/20'), el('p', 'note-txt', 'Wow ! Vous avez adoré !'));
+    return show('stats');
+  }
   const max = Math.max(1, ...counts);
   $('bars').replaceChildren(...q.c.map((c, i) => {
     const row = el('div', 'row' + (poll ? '' : i === q.a ? ' good' : ' dim'));

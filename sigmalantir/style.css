@@ -137,3 +137,9 @@ input:focus { outline: none; border-color: var(--accent); }
 @media (min-width: 900px) { :root { --roue: 70px; } }
 /* sur le téléphone, la roue disparaît pendant qu'on répond pour ne pas cacher les boutons */
 body:has(#play:not([hidden])) .mascotte { display: none; }
+
+/* Question "note" : saisie sur le téléphone et faux résultat 20/20 */
+#noteform { max-width: 360px; margin: 24px auto; }
+#noteform button { width: 100%; }
+.note-big { font-size: clamp(90px, 20vw, 220px); font-weight: 800; line-height: 1; margin: 24px 0 8px; color: var(--c3); }
+.note-txt { font-size: clamp(22px, 4vw, 40px); margin: 0; }
