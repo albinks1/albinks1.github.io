@@ -1,3 +1,7 @@
+/* TeX Gyre Heros : clone libre d'Helvetica (licence GUST Font License), servie depuis le dépôt */
+@font-face { font-family: "Heros"; src: url("fonts/texgyreheros-regular.otf") format("opentype"); font-weight: 400; }
+@font-face { font-family: "Heros"; src: url("fonts/texgyreheros-bold.otf") format("opentype"); font-weight: 600 900; }
+
 :root {
   --bg: #12121c;
   --panel: #1d1d2b;
@@ -18,7 +22,7 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font: 18px/1.4 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 18px/1.4 "Heros", Helvetica, Arial, sans-serif;
 }
 
 /* bas de page réservé au passage de la roue (hauteur = largeur x 1.6) */
