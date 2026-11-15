@@ -57,16 +57,20 @@ function fail(msg) {
 $('form').onsubmit = e => {
   e.preventDefault();
   myName = $('name').value.trim();
-  $('msg').textContent = 'Connexion...';
+  $('msg').textContent = 'Connexion au serveur...';
   if (peer) peer.destroy();
   peer = new Peer();
+  const timer = setTimeout(() => fail('Délai dépassé (' + $('msg').textContent + '). Le réseau bloque peut-être la connexion : essayez en 4G ou sur un autre Wi-Fi.'), 15000);
   peer.on('open', () => {
+    $('msg').textContent = 'Connexion à la partie...';
     conn = peer.connect('sigmalantir-' + $('code').value.trim(), { reliable: true });
-    conn.on('open', () => conn.send({ t: 'join', name: myName }));
+    conn.on('open', () => { clearTimeout(timer); conn.send({ t: 'join', name: myName }); });
+    conn.on('iceStateChanged', s => $('msg').textContent = 'Connexion à la partie... (' + s + ')');
+    conn.on('error', e => { clearTimeout(timer); fail('Erreur de connexion : ' + (e.type || e.message || e)); });
     conn.on('data', onData);
     conn.on('close', () => fail('Connexion perdue. Rejoignez avec le même pseudo pour garder votre score.'));
   });
-  peer.on('error', e => fail(e.type === 'peer-unavailable' ? 'Partie introuvable, vérifiez le code.' : 'Erreur : ' + e.type));
+  peer.on('error', e => clearTimeout(timer) || fail(e.type === 'peer-unavailable' ? 'Partie introuvable, vérifiez le code.' : 'Erreur : ' + e.type));
 };
 
 function onData(d) {
