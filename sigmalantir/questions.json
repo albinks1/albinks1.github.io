@@ -3,5 +3,6 @@
   { "q": "Combien vaut 7 x 8 ?", "c": ["54", "56", "58", "64"], "a": 1, "time": 15 },
   { "q": "Quel langage s'exécute nativement dans le navigateur ?", "c": ["Python", "C++", "JavaScript", "Rust"], "a": 2, "time": 20 },
   { "q": "Vrai ou faux : la lumière met environ 8 minutes pour venir du Soleil.", "c": ["Vrai", "Faux"], "a": 0, "time": 15 },
-  { "q": "Sondage : votre boisson préférée le matin ?", "c": ["Café", "Thé", "Jus", "Rien"], "time": 20 }
+  { "q": "Sondage : votre boisson préférée le matin ?", "c": ["Café", "Thé", "Jus", "Rien"], "time": 20 },
+  { "q": "Quelle note donneriez-vous à notre groupe ?", "type": "note", "time": 30 }
 ]

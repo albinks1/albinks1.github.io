@@ -31,6 +31,10 @@
     <p id="pnum" class="muted"></p>
     <h2 id="ptext"></h2>
     <div id="btns" class="answers"></div>
+    <form id="noteform" hidden>
+      <input id="note" type="number" min="0" max="20" step="0.5" inputmode="decimal" placeholder="Note sur 20" required>
+      <button>Valider</button>
+    </form>
   </section>
 </main>
 
@@ -39,7 +43,22 @@ const $ = id => document.getElementById(id);
 const show = id => document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== id);
 const LETTERS = 'ABCD';
 const db = firebase.initializeApp(FIREBASE_CONFIG).database();
-let game, pid, myName = '', answered = -1;
+let game, pid, myName = '', answered = -1, current;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const MSG = {
+  ok: ['Bonne réponse ! Tu pèses un max !', 'Correct ! Le cerveau est allumé.', 'Bien joué, tu es une légende.',
+    'Exact ! Les autres peuvent rentrer chez eux.', 'Bonne réponse ! Rien ne t\'arrête.'],
+  ko: ['Mauvaise réponse, c\'est lamentable...', 'Raté. On en reparlera.', 'Faux. Même la roue aurait trouvé.',
+    'Mauvaise réponse... Tu fais exprès ?', 'Non. Juste non.'],
+  none: ['Pas de réponse ? Tu dormais ?', 'Trop lent. Beaucoup trop lent.', 'Le chrono t\'a battu.']
+};
+
+function answer(data) {
+  answered = current;
+  game.child('answers/' + current + '/' + pid).set(data);
+  wait('Réponse envoyée', 'En attente des autres joueurs...');
+}
+$('noteform').onsubmit = e => { e.preventDefault(); answer({ n: Number($('note').value) }); };
 
 const code = new URLSearchParams(location.search).get('c');
 if (code) { $('code').value = code; $('name').focus(); }
@@ -97,18 +116,18 @@ function onState(st) {
     if (answered === st.n) return wait('Réponse envoyée', 'En attente des autres joueurs...');
     $('pnum').textContent = 'Question ' + (st.n + 1) + ' / ' + st.total;
     $('ptext').textContent = st.q;
-    $('btns').replaceChildren(...st.c.map((c, i) => {
+    current = st.n;
+    const note = st.type === 'note';
+    $('noteform').hidden = !note;
+    $('note').value = '';
+    $('btns').replaceChildren(...(note ? [] : st.c).map((c, i) => {
       const b = document.createElement('button');
       b.className = 'k' + i;
       const l = document.createElement('span');
       l.className = 'letter';
       l.textContent = LETTERS[i];
       b.append(l, document.createTextNode(c));
-      b.onclick = () => {
-        answered = st.n;
-        game.child('answers/' + st.n + '/' + pid).set({ i });
-        wait('Réponse envoyée', 'En attente des autres joueurs...');
-      };
+      b.onclick = () => answer({ i });
       return b;
     }));
     show('play');
@@ -121,10 +140,11 @@ function showResult(d, end) {
   if (!d) return wait(myName, 'Vous jouerez à la prochaine question.');
   const rank = 'Rang ' + d.rank + ' / ' + d.total;
   if (end) wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score);
-  else if (!d.answered) wait('Pas de réponse', rank, d.score, 'ko');
+  else if (d.note) wait('Merci pour votre 20/20 !', 'Nous aussi on vous aime.', d.score);
+  else if (!d.answered) wait(pick(MSG.none), rank, d.score, 'ko');
   else if (d.poll) wait('Merci pour votre vote', rank, d.score);
-  else if (d.ok) wait('Correct ! +' + d.pts, rank, d.score, 'ok');
-  else wait('Raté', rank, d.score, 'ko');
+  else if (d.ok) wait(pick(MSG.ok), '+' + d.pts + ' pts - ' + rank, d.score, 'ok');
+  else wait(pick(MSG.ko), rank, d.score, 'ko');
 }
 </script>
 <script src="anim.js"></script>
