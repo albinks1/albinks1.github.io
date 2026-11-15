@@ -10,7 +10,7 @@
 <body>
 <main>
   <section id="lobby">
-    <h1>Sigmalantir</h1>
+    <h1><img class="logo" src="sigmalantir.svg" alt="Sigmalantir"></h1>
     <p id="status" class="muted">Connexion au serveur...</p>
     <div class="join-box">
       <img id="qr" alt="QR code pour rejoindre">
@@ -71,7 +71,9 @@ function openRoom() {
     $('code').textContent = code;
     $('link').textContent = url;
     $('qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=' + encodeURIComponent(url);
-    $('status').textContent = 'Scannez le QR code pour rejoindre';
+    $('status').textContent = /^(localhost|127\.)/.test(location.hostname) || location.protocol === 'file:'
+      ? 'Attention : cette adresse n\'est pas accessible depuis un téléphone (ouvrez la page via le site ou l\'IP du PC)'
+      : 'Scannez le QR code pour rejoindre';
   });
   peer.on('error', e => {
     if (e.type === 'unavailable-id') { peer.destroy(); openRoom(); }
@@ -202,5 +204,6 @@ $('skip').onclick = endQuestion;
 $('toRank').onclick = showRank;
 $('next').onclick = nextQuestion;
 </script>
+<script src="anim.js"></script>
 </body>
 </html>
