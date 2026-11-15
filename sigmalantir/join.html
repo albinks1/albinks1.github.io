@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sigmalantir</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<main>
+  <section id="login">
+    <h1>Sigmalantir</h1>
+    <form id="form">
+      <input id="code" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="Code" required>
+      <input id="name" maxlength="20" placeholder="Pseudo" autocomplete="off" required>
+      <button>Rejoindre</button>
+    </form>
+    <p id="msg" class="muted"></p>
+  </section>
+
+  <section id="wait" hidden>
+    <h2 id="wtitle"></h2>
+    <p id="wtext"></p>
+    <p id="wscore" class="score"></p>
+  </section>
+
+  <section id="play" hidden>
+    <p id="pnum" class="muted"></p>
+    <h2 id="ptext"></h2>
+    <div id="btns" class="answers"></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const show = id => document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== id);
+const LETTERS = 'ABCD';
+let peer, conn, myName = '';
+
+const code = new URLSearchParams(location.search).get('c');
+if (code) { $('code').value = code; $('name').focus(); }
+
+function wait(title, text, score, cls) {
+  $('wtitle').textContent = title;
+  $('wtext').textContent = text || '';
+  $('wscore').textContent = score != null ? score + ' pts' : '';
+  $('wait').className = cls || '';
+  show('wait');
+}
+
+function fail(msg) {
+  $('msg').textContent = msg;
+  show('login');
+}
+
+$('form').onsubmit = e => {
+  e.preventDefault();
+  myName = $('name').value.trim();
+  $('msg').textContent = 'Connexion...';
+  if (peer) peer.destroy();
+  peer = new Peer();
+  peer.on('open', () => {
+    conn = peer.connect('sigmalantir-' + $('code').value.trim(), { reliable: true });
+    conn.on('open', () => conn.send({ t: 'join', name: myName }));
+    conn.on('data', onData);
+    conn.on('close', () => fail('Connexion perdue. Rejoignez avec le même pseudo pour garder votre score.'));
+  });
+  peer.on('error', e => fail(e.type === 'peer-unavailable' ? 'Partie introuvable, vérifiez le code.' : 'Erreur : ' + e.type));
+};
+
+function onData(d) {
+  if (d.t === 'error') fail(d.msg);
+  else if (d.t === 'joined') wait(d.name, 'Vous êtes inscrit. Regardez l\'écran.', d.score);
+  else if (d.t === 'sent') wait('Réponse envoyée', 'En attente des autres joueurs...');
+  else if (d.t === 'question') {
+    $('pnum').textContent = 'Question ' + d.n + ' / ' + d.total;
+    $('ptext').textContent = d.q;
+    $('btns').replaceChildren(...d.c.map((c, i) => {
+      const b = document.createElement('button');
+      b.className = 'k' + i;
+      const l = document.createElement('span');
+      l.className = 'letter';
+      l.textContent = LETTERS[i];
+      b.append(l, document.createTextNode(c));
+      b.onclick = () => { conn.send({ t: 'answer', i }); wait('Réponse envoyée', 'En attente des autres joueurs...'); };
+      return b;
+    }));
+    show('play');
+  } else if (d.t === 'result') {
+    const rank = 'Rang ' + d.rank + ' / ' + d.total;
+    if (!d.answered) wait('Pas de réponse', rank, d.score, 'ko');
+    else if (d.poll) wait('Merci pour votre vote', rank, d.score);
+    else if (d.ok) wait('Correct ! +' + d.pts, rank, d.score, 'ok');
+    else wait('Raté', rank, d.score, 'ko');
+  } else if (d.t === 'end') {
+    wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score);
+  }
+}
+</script>
+</body>
+</html>

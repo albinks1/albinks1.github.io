@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sigmalantir - Hôte</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<main>
+  <section id="lobby">
+    <h1>Sigmalantir</h1>
+    <p id="status" class="muted">Connexion au serveur...</p>
+    <div class="join-box">
+      <img id="qr" alt="QR code pour rejoindre">
+      <div>
+        <p class="muted">Rejoindre sur</p>
+        <p id="link" class="link"></p>
+        <p class="muted">Code de la partie</p>
+        <p id="code" class="code">----</p>
+      </div>
+    </div>
+    <h2><span id="count">0</span> joueur(s)</h2>
+    <ul id="players" class="chips"></ul>
+    <button id="start" disabled>Démarrer</button>
+  </section>
+
+  <section id="question" hidden>
+    <div class="bar"><span id="qnum"></span><span id="timer" class="timer"></span><span id="answered"></span></div>
+    <h1 id="qtext"></h1>
+    <ol id="choices" class="choices"></ol>
+    <button id="skip">Arrêter le chrono</button>
+  </section>
+
+  <section id="stats" hidden>
+    <h2 id="stext"></h2>
+    <div id="bars"></div>
+    <button id="toRank">Classement</button>
+  </section>
+
+  <section id="rank" hidden>
+    <h1 id="rtitle">Classement</h1>
+    <ol id="ranking" class="ranking"></ol>
+    <button id="next">Question suivante</button>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const show = id => document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const LETTERS = 'ABCD';
+
+let questions = [], qi = -1, phase = 'lobby', qStart = 0, tick = null;
+const players = new Map();   // clé : pseudo en minuscules -> { name, score, conn }
+let answers = new Map();     // joueur -> { i, pts }
+
+const online = () => [...players.values()].filter(p => p.conn && p.conn.open);
+const send = (p, msg) => { if (p.conn && p.conn.open) p.conn.send(msg); };
+const sorted = () => [...players.values()].sort((a, b) => b.score - a.score);
+
+fetch('questions.json').then(r => r.json()).then(q => { questions = q; renderPlayers(); })
+  .catch(() => $('status').textContent = 'Impossible de charger questions.json');
+
+function openRoom() {
+  const code = String(1000 + Math.floor(Math.random() * 9000));
+  const peer = new Peer('sigmalantir-' + code);
+  peer.on('open', () => {
+    const url = new URL('join.html?c=' + code, location.href).href;
+    $('code').textContent = code;
+    $('link').textContent = url;
+    $('qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=' + encodeURIComponent(url);
+    $('status').textContent = 'Scannez le QR code pour rejoindre';
+  });
+  peer.on('error', e => {
+    if (e.type === 'unavailable-id') { peer.destroy(); openRoom(); }
+    else $('status').textContent = 'Erreur : ' + e.type;
+  });
+  peer.on('connection', conn => {
+    conn.on('data', d => onData(conn, d));
+    conn.on('close', () => {
+      if (phase === 'lobby' && conn.player && conn.player.conn === conn) players.delete(conn.player.name.toLowerCase());
+      renderPlayers();
+      if (phase === 'question' && answers.size >= online().length) endQuestion();
+    });
+  });
+}
+openRoom();
+
+function onData(conn, d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'join') {
+    const name = String(d.name || '').replace(/\s+/g, ' ').trim().slice(0, 20);
+    if (!name) return;
+    const key = name.toLowerCase();
+    let p = players.get(key);
+    if (p && p.conn && p.conn.open && p.conn !== conn) return conn.send({ t: 'error', msg: 'Pseudo déjà pris' });
+    if (!p) players.set(key, p = { name, score: 0 });
+    p.conn = conn;          // un joueur déconnecté reprend sa place avec le même pseudo
+    conn.player = p;
+    send(p, { t: 'joined', name: p.name, score: p.score });
+    if (phase === 'question' && !answers.has(p)) sendQuestion(p);
+    renderPlayers();
+  } else if (d.t === 'answer') {
+    const p = conn.player, q = questions[qi];
+    if (!p || phase !== 'question' || answers.has(p)) return;
+    if (!Number.isInteger(d.i) || d.i < 0 || d.i >= q.c.length) return;
+    const ratio = Math.min((Date.now() - qStart) / 1000 / q.time, 1);
+    const pts = 'a' in q && d.i === q.a ? Math.round(1000 * (1 - ratio / 2)) : 0;
+    answers.set(p, { i: d.i, pts });
+    send(p, { t: 'sent' });
+    $('answered').textContent = answers.size + ' réponse(s)';
+    if (answers.size >= online().length) endQuestion();
+  }
+}
+
+function renderPlayers() {
+  $('count').textContent = players.size;
+  $('players').replaceChildren(...[...players.values()].map(p => el('li', null, p.name)));
+  $('start').disabled = !players.size || !questions.length;
+}
+
+function sendQuestion(p) {
+  const q = questions[qi];
+  send(p, { t: 'question', n: qi + 1, total: questions.length, q: q.q, c: q.c });
+}
+
+function nextQuestion() {
+  qi++;
+  const q = questions[qi];
+  q.time = q.time || 20;
+  answers = new Map();
+  phase = 'question';
+  $('qnum').textContent = 'Question ' + (qi + 1) + ' / ' + questions.length;
+  $('qtext').textContent = q.q;
+  $('answered').textContent = '0 réponse(s)';
+  $('choices').replaceChildren(...q.c.map((c, i) => {
+    const li = el('li', 'k' + i);
+    li.append(el('span', 'letter', LETTERS[i]), el('span', null, c));
+    return li;
+  }));
+  show('question');
+  players.forEach(sendQuestion);
+  qStart = Date.now();
+  const update = () => {
+    const left = Math.max(0, q.time - (Date.now() - qStart) / 1000);
+    $('timer').textContent = Math.ceil(left);
+    if (left <= 0) endQuestion();
+  };
+  update();
+  tick = setInterval(update, 200);
+}
+
+function endQuestion() {
+  if (phase !== 'question') return;
+  phase = 'stats';
+  clearInterval(tick);
+  const q = questions[qi], poll = !('a' in q);
+  const counts = q.c.map(() => 0);
+  answers.forEach((r, p) => { counts[r.i]++; p.score += r.pts; });
+  const ranks = sorted();
+  players.forEach(p => {
+    const r = answers.get(p);
+    send(p, { t: 'result', poll, answered: !!r, ok: !poll && !!r && r.i === q.a,
+      pts: r ? r.pts : 0, score: p.score, rank: ranks.indexOf(p) + 1, total: ranks.length });
+  });
+
+  $('stext').textContent = q.q;
+  const max = Math.max(1, ...counts);
+  $('bars').replaceChildren(...q.c.map((c, i) => {
+    const row = el('div', 'row' + (poll ? '' : i === q.a ? ' good' : ' dim'));
+    const label = el('div', 'label');
+    label.append(el('span', 'letter k' + i, LETTERS[i]), el('span', null, c));
+    const track = el('div', 'track'), fill = el('div', 'fill k' + i);
+    fill.style.width = '0';
+    track.append(fill);
+    row.append(label, track, el('div', 'n', counts[i]));
+    requestAnimationFrame(() => requestAnimationFrame(() => fill.style.width = (counts[i] / max * 100) + '%'));
+    return row;
+  }));
+  show('stats');
+}
+
+function showRank() {
+  phase = 'rank';
+  const last = qi === questions.length - 1;
+  const ranks = sorted();
+  $('rtitle').textContent = last ? 'Classement final' : 'Classement';
+  $('ranking').replaceChildren(...ranks.slice(0, 10).map(p => {
+    const li = el('li');
+    li.append(el('span', 'name', p.name), el('span', 'pts', p.score));
+    return li;
+  }));
+  $('next').hidden = last;
+  if (last) ranks.forEach((p, i) => send(p, { t: 'end', score: p.score, rank: i + 1, total: ranks.length }));
+  show('rank');
+}
+
+$('start').onclick = nextQuestion;
+$('skip').onclick = endQuestion;
+$('toRank').onclick = showRank;
+$('next').onclick = nextQuestion;
+</script>
+</body>
+</html>

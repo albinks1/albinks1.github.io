@@ -1,0 +1,122 @@
+:root {
+  --bg: #12121c;
+  --panel: #1d1d2b;
+  --text: #f2f2f7;
+  --muted: #9a9ab0;
+  --accent: #8b7cff;
+  --c0: #e5484d;
+  --c1: #3e7bfa;
+  --c2: #e2a000;
+  --c3: #30a46c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 18px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+section { text-align: center; }
+[hidden] { display: none !important; }
+
+h1 { font-size: clamp(28px, 5vw, 56px); margin: 0.3em 0; }
+h2 { font-size: clamp(22px, 4vw, 36px); margin: 0.4em 0; }
+.muted { color: var(--muted); }
+
+button {
+  font: inherit; font-weight: 600;
+  border: 0; border-radius: 12px;
+  padding: 14px 28px; margin-top: 24px;
+  background: var(--accent); color: #fff; cursor: pointer;
+}
+button:disabled { opacity: 0.4; cursor: default; }
+
+input {
+  display: block; width: 100%; margin: 12px 0;
+  font: inherit; font-size: 22px; text-align: center;
+  padding: 14px; border-radius: 12px;
+  border: 2px solid #33334a; background: var(--panel); color: var(--text);
+}
+input:focus { outline: none; border-color: var(--accent); }
+
+#form { max-width: 360px; margin: 24px auto; }
+#form button { width: 100%; }
+
+/* Lobby hôte */
+.join-box {
+  display: flex; flex-wrap: wrap; gap: 32px;
+  align-items: center; justify-content: center;
+  background: var(--panel); border-radius: 20px; padding: 24px; margin: 24px 0;
+}
+.join-box img { width: 280px; height: 280px; background: #fff; border-radius: 12px; }
+.join-box p { margin: 4px 0; }
+.link { font-weight: 600; word-break: break-all; max-width: 420px; }
+.code { font-size: 64px; font-weight: 800; letter-spacing: 8px; color: var(--accent); }
+
+.chips { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.chips li { background: var(--panel); padding: 8px 16px; border-radius: 999px; }
+
+/* Question */
+.bar { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 22px; }
+.timer {
+  width: 90px; height: 90px; line-height: 90px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 40px; font-weight: 800;
+}
+
+.choices, .answers {
+  list-style: none; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;
+}
+.choices li, .answers button {
+  display: flex; align-items: center; gap: 16px;
+  margin: 0; padding: 24px; border-radius: 16px;
+  color: #fff; font-size: clamp(18px, 3vw, 30px); font-weight: 600; text-align: left;
+}
+.answers button { min-height: 110px; font-size: 20px; }
+.letter {
+  flex: none; width: 1.8em; height: 1.8em; line-height: 1.8em; text-align: center;
+  border-radius: 8px; background: rgba(0, 0, 0, 0.25);
+}
+.k0 { background: var(--c0); }
+.k1 { background: var(--c1); }
+.k2 { background: var(--c2); }
+.k3 { background: var(--c3); }
+
+/* Statistiques */
+#bars { margin-top: 24px; }
+.row { display: flex; align-items: center; gap: 16px; margin: 14px 0; text-align: left; }
+.row .label { flex: 0 0 34%; font-size: 24px; display: flex; gap: 12px; align-items: center; }
+.row .track { flex: 1; height: 48px; background: var(--panel); border-radius: 10px; overflow: hidden; }
+.row .fill { height: 100%; border-radius: 10px; transition: width 0.6s; }
+.row .n { flex: 0 0 60px; font-size: 28px; font-weight: 700; text-align: right; }
+.row.dim { opacity: 0.3; }
+.row.good .label { font-weight: 800; }
+.row.good .track { outline: 3px solid #fff; }
+
+/* Classement */
+.ranking { list-style: none; padding: 0; max-width: 700px; margin: 24px auto; counter-reset: r; }
+.ranking li {
+  counter-increment: r; display: flex; gap: 16px; align-items: center;
+  background: var(--panel); border-radius: 12px; padding: 14px 20px; margin: 10px 0; font-size: 26px;
+}
+.ranking li::before { content: counter(r); width: 40px; font-weight: 800; color: var(--accent); }
+.ranking .name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ranking .pts { font-weight: 700; }
+
+/* Joueur */
+#wait { padding: 48px 16px; border-radius: 20px; margin-top: 24px; background: var(--panel); }
+#wait.ok { background: var(--c3); }
+#wait.ko { background: var(--c0); }
+.score { font-size: 40px; font-weight: 800; }
+
+@media (max-width: 600px) {
+  .answers { grid-template-columns: 1fr; }
+  .choices { grid-template-columns: 1fr; }
+  .row .label { flex-basis: 40%; font-size: 18px; }
+  .code { font-size: 48px; }
+}
