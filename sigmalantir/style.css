@@ -230,3 +230,15 @@ h1, h2 { text-wrap: balance; }
   #bars { margin-top: 36px; }
   .explain { margin-top: 36px; }
 }
+@media (min-width: 900px) {
+  .bar { margin-bottom: 7vh; }          /* descend le bloc question + propositions vers le centre */
+  #stats h2 { margin-top: 7vh; }
+  .choices { margin-top: 48px; }
+}
+/* Écran projeté : question + propositions centrées verticalement sous l'en-tête */
+@media (min-width: 900px) {
+  #question { display: flex; flex-direction: column; min-height: calc(100vh - var(--roue) * 1.5 - 8px); }
+  #question .bar { margin-bottom: 0; }
+  #question #qtext { margin-top: auto; }
+  #question #skip { margin-bottom: auto; align-self: center; }
+}
