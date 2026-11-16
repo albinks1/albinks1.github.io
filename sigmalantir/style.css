@@ -242,3 +242,11 @@ h1, h2 { text-wrap: balance; }
   #question #qtext { margin-top: auto; }
   #question #skip { margin-bottom: auto; align-self: center; }
 }
+
+/* Téléphone : question + réponses, et résultats, centrés verticalement (page joueur uniquement) */
+body:has(#play) main { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+body:has(#wait:not([hidden])) main { min-height: calc(100vh - 72px); min-height: calc(100svh - 72px); }  /* 72 px = petit logo affiché au-dessus */
+#play { flex: 1; display: flex; flex-direction: column; }
+#play #ptext { margin-top: auto; }
+#play::after { content: ""; margin-top: auto; }
+#wait { margin: auto 0; }
