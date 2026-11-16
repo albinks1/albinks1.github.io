@@ -204,3 +204,10 @@ body:has(#play:not([hidden])) .mini-logo { display: none; }
 .head-logo { height: 40px; width: auto; filter: brightness(0) invert(1); }
 .head #pnum { font-size: 16px; }
 @media (min-width: 900px) { .timer { font-size: 30px; padding: 4px 20px; } }
+
+/* Logos plus gros, léger espace entre l'en-tête et la question */
+.head-logo, .mini-logo { height: 52px; }
+.head { margin: 4px 0 18px; }
+.bar-logo { height: 84px; }
+.bar { margin-bottom: 20px; }
+@media (min-width: 900px) { .mini-logo { height: 90px; } }
