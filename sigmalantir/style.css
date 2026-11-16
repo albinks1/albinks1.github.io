@@ -224,3 +224,9 @@ html, body { overscroll-behavior: none; }
 @media (max-width: 899px) { .mini-logo { height: 60px; } }
 /* Lignes équilibrées dans les questions (pas de mot isolé sur la dernière ligne) */
 h1, h2 { text-wrap: balance; }
+/* Écran projeté : léger espace entre l'en-tête (question) et les propositions / résultats */
+@media (min-width: 900px) {
+  .choices { margin-top: 40px; }
+  #bars { margin-top: 36px; }
+  .explain { margin-top: 36px; }
+}
