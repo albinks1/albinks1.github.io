@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir</title>
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=11">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -52,6 +52,8 @@
 const $ = id => document.getElementById(id);
 const show = id => document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== id);
 const LETTERS = 'ABCD';
+// espace insécable avant ? ! : ; pour que la ponctuation ne parte pas seule à la ligne
+const fr = t => String(t).replace(/ ([?!:;])/g, '\u00a0$1');
 const db = firebase.initializeApp(FIREBASE_CONFIG).database();
 let game, pid, myName = '', answered = -1, current;
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -151,7 +153,7 @@ function onState(st) {
   else if (st.phase === 'question') {
     if (answered === st.n) return wait('Réponse envoyée', 'En attente des autres joueurs...');
     $('pnum').textContent = 'Question ' + (st.n + 1) + ' / ' + st.total;
-    $('ptext').textContent = st.q;
+    $('ptext').textContent = fr(st.q);
     current = st.n;
     const note = st.type === 'note';
     $('noteform').hidden = !note;

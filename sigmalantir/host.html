@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir - Hôte</title>
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=11">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -55,6 +55,8 @@ const $ = id => document.getElementById(id);
 const show = id => document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const LETTERS = 'ABCD';
+// espace insécable avant ? ! : ; pour que la ponctuation ne parte pas seule à la ligne
+const fr = t => String(t).replace(/ ([?!:;])/g, '\u00a0$1');
 const db = firebase.initializeApp(FIREBASE_CONFIG).database();
 
 let questions = [], qi = -1, phase = 'lobby', qStart = 0, tick = null, game, ansRef;
@@ -120,7 +122,7 @@ function nextQuestion() {
   answers = new Map();
   phase = 'question';
   $('qnum').textContent = 'Question ' + (qi + 1) + ' / ' + questions.length;
-  $('qtext').textContent = q.q;
+  $('qtext').textContent = fr(q.q);
   $('answered').textContent = '0 réponse(s)';
   $('choices').replaceChildren(...(q.type === 'note'
     ? [el('li', 'k1', 'Donnez une note de 0 à 20 sur votre téléphone')]
@@ -163,7 +165,7 @@ function endQuestion() {
   });
   game.update(upd);
 
-  $('stext').textContent = q.q;
+  $('stext').textContent = fr(q.q);
   if (note) {   // quelle que soit la vraie moyenne...
     $('bars').replaceChildren(el('p', 'note-txt', 'Résultats du sondage'), el('p', 'note-big', '20/20'),
       el('p', 'note-txt muted', 'Moyenne des ' + answers.size + ' réponse(s)'));
