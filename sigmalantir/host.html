@@ -155,7 +155,9 @@ function endQuestion() {
   ranks.forEach(([pid, p], k) => {
     const r = answers.get(pid);
     upd['results/' + pid] = { poll, note, answered: !!r, ok: !poll && !!r && r.i === q.a,
-      pts: r ? r.pts : 0, score: p.score, rank: k + 1, total: ranks.length };
+      pts: r ? r.pts : 0, score: p.score, rank: k + 1, total: ranks.length,
+      // remarque propre à la question : par choix (sondage) ou selon bonne / mauvaise réponse
+      remark: (!r ? '' : q.r ? q.r[r.i] : r.i === q.a ? q.ok : q.ko) || '' };
   });
   game.update(upd);
 
