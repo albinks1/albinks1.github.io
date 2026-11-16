@@ -16,9 +16,17 @@
     <form id="form">
       <input id="code" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="Code" required>
       <input id="name" maxlength="20" placeholder="Pseudo" autocomplete="off" required>
+      <label class="consent"><input type="checkbox" required> J'accepte que mes données soient traitées et envoyées au gouvernement américain.</label>
       <button>Rejoindre</button>
     </form>
     <p id="msg" class="muted"></p>
+  </section>
+
+  <section id="lobby" hidden>
+    <img class="logo" src="sigmalantir.svg" alt="Sigmalantir">
+    <div class="spin-wrap"><img id="spin" class="spin" alt=""></div>
+    <h2>En attente d'autres adversaires</h2>
+    <p id="lname" class="muted"></p>
   </section>
 
   <section id="wait" hidden>
@@ -111,7 +119,11 @@ $('form').onsubmit = async e => {
 
 function onState(st) {
   if (!st) return fail('La partie a été fermée.');
-  if (st.phase === 'lobby') wait(myName, 'Vous êtes inscrit. Regardez l\'écran.');
+  if (st.phase === 'lobby') {
+    $('spin').src = window.SIGMA_IMAGE || '';
+    $('lname').textContent = 'Connecté en tant que ' + myName;
+    show('lobby');
+  }
   else if (st.phase === 'question') {
     if (answered === st.n) return wait('Réponse envoyée', 'En attente des autres joueurs...');
     $('pnum').textContent = 'Question ' + (st.n + 1) + ' / ' + st.total;
