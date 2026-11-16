@@ -150,3 +150,18 @@ body:has(#play:not([hidden])) .mascotte { display: none; }
 .explain { font-size: clamp(18px, 2.6vw, 28px); max-width: 900px; margin: 28px auto 0; }
 .remark { font-size: 20px; font-style: italic; margin: 4px 0 16px; }
 .legal { font-size: 13px; color: var(--muted); max-width: 640px; margin: -4px auto 8px; }
+
+/* Case à cocher des téléphones */
+.consent { display: flex; gap: 10px; align-items: flex-start; text-align: left; font-size: 13px; color: var(--muted); margin: 4px 0 8px; }
+.consent input { display: inline; width: auto; margin: 2px 0 0; flex: none; }
+
+/* Écran d'attente des téléphones : la roue tourne sur elle-même en 3D */
+#lobby { padding-top: 16px; }
+.spin-wrap { perspective: 600px; margin: 40px auto 24px; }
+.spin {
+  width: 110px; height: auto;
+  filter: invert(1) drop-shadow(0 0 10px var(--accent));
+  animation: tourne 3s linear infinite;
+}
+@keyframes tourne { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+body:has(#lobby:not([hidden])) .mascotte { display: none; }
