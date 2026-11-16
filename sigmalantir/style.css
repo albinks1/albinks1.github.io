@@ -213,3 +213,14 @@ body:has(#play:not([hidden])) .mini-logo { display: none; }
 
 /* Pas de défilement si tout tient à l'écran, et pas d'effet élastique sur iPhone */
 html, body { overscroll-behavior: none; }
+
+/* Écran projeté : question et réponses un peu plus petites, logo un peu plus gros */
+#qtext { font-size: clamp(26px, 4.2vw, 48px); }
+.choices li { font-size: clamp(16px, 2.6vw, 26px); padding: 20px; }
+.bar-logo { height: 96px; }
+/* Téléphone : logo un peu plus gros */
+.head-logo { height: 60px; }
+.head { margin-bottom: 12px; }
+@media (max-width: 899px) { .mini-logo { height: 60px; } }
+/* Lignes équilibrées dans les questions (pas de mot isolé sur la dernière ligne) */
+h1, h2 { text-wrap: balance; }
