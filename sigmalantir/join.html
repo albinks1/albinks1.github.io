@@ -24,7 +24,7 @@
 
   <section id="lobby" hidden>
     <img class="logo" src="sigmalantir.svg" alt="Sigmalantir">
-    <div class="spin-wrap"><img id="spin" class="spin" alt=""></div>
+    <div class="spin-wrap"><div id="spin" class="spin"></div></div>
     <h2>En attente d'autres adversaires</h2>
     <p id="lname" class="muted"></p>
   </section>
@@ -117,10 +117,29 @@ $('form').onsubmit = async e => {
   }
 };
 
+// Roue de l'écran d'attente : l'animation en cours, recopiée sur 10 couches
+// décalées en profondeur pour lui donner de l'épaisseur
+const LAYERS = [...Array(10)].map((_, k) => {
+  const c = document.createElement('canvas');
+  c.width = 150; c.height = 240;
+  c.style.transform = 'translateZ(' + (k - 4.5) * 1.6 + 'px)';
+  if (k === 0 || k === 9) c.className = 'face';
+  $('spin').append(c);
+  return c;
+});
+setInterval(() => {
+  const src = window.SIGMA_CANVAS;
+  if (!src || $('lobby').hidden) return;
+  LAYERS.forEach(c => {
+    const x = c.getContext('2d');
+    x.clearRect(0, 0, c.width, c.height);
+    x.drawImage(src, 0, 0);
+  });
+}, 40);
+
 function onState(st) {
   if (!st) return fail('La partie a été fermée.');
   if (st.phase === 'lobby') {
-    $('spin').src = window.SIGMA_IMAGE || '';
     $('lname').textContent = 'Connecté en tant que ' + myName;
     show('lobby');
   }
