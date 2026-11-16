@@ -139,8 +139,6 @@ input:focus { outline: none; border-color: var(--accent); }
 }
 @keyframes roule { to { transform: translateX(calc(-100vw - 100%)); } }
 @media (min-width: 900px) { :root { --roue: 70px; } }
-/* sur le téléphone, la roue disparaît pendant qu'on répond pour ne pas cacher les boutons */
-body:has(#play:not([hidden])) .mascotte { display: none; }
 
 /* Question "note" : saisie sur le téléphone et faux résultat 20/20 */
 #noteform { max-width: 360px; margin: 24px auto; }
@@ -162,3 +160,16 @@ body:has(#play:not([hidden])) .mascotte { display: none; }
 .spin canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 @keyframes tourne { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 body:has(#lobby:not([hidden])) .mascotte { display: none; }
+
+/* Dégradé en bas de l'écran, derrière la roue, pour la faire ressortir */
+body::after {
+  content: ""; position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; pointer-events: none;
+  height: calc(var(--roue) * 1.6 + 24px);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+/* Petit logo en haut pendant les questions, résultats et classement */
+.mini-logo { display: block; height: 26px; width: auto; margin: 12px auto 0; filter: brightness(0) invert(1); opacity: 0.85; }
+body:has(#login:not([hidden])) .mini-logo,
+body:has(#lobby:not([hidden])) .mini-logo { display: none; }
+@media (min-width: 900px) { .mini-logo { height: 38px; margin-top: 16px; } }
