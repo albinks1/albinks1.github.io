@@ -19,14 +19,13 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
   background: var(--bg);
   color: var(--text);
   font: 18px/1.4 "Heros", Helvetica, Arial, sans-serif;
 }
 
 /* bas de page réservé au passage de la roue (hauteur = largeur x 1.6) */
-main { max-width: 1100px; margin: 0 auto; padding: 12px 16px calc(var(--roue) * 1.6 + 12px); }
+main { max-width: 1100px; margin: 0 auto; padding: 8px 16px calc(var(--roue) * 1.5); }
 section { text-align: center; }
 [hidden] { display: none !important; }
 
@@ -211,3 +210,6 @@ body:has(#play:not([hidden])) .mini-logo { display: none; }
 .bar-logo { height: 84px; }
 .bar { margin-bottom: 20px; }
 @media (min-width: 900px) { .mini-logo { height: 90px; } }
+
+/* Pas de défilement si tout tient à l'écran, et pas d'effet élastique sur iPhone */
+html, body { overscroll-behavior: none; }
