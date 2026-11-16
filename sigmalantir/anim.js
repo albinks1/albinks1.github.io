@@ -427,7 +427,7 @@ canvas.width = 150; canvas.height = 240; // assez grand pour la plus haute image
 document.body.append(canvas);
 const ctx = canvas.getContext('2d');
 const images = frames.map(s => { const i = new Image(); i.src = 'data:image/svg+xml,' + encodeURIComponent(s); return i; });
-window.SIGMA_IMAGE = images[0].src; // première image, réutilisée pour l'écran d'attente des téléphones
+window.SIGMA_CANVAS = canvas; // recopié par l'écran d'attente des téléphones
 let f = 0;
 setInterval(() => {
   const img = images[f];

@@ -157,11 +157,9 @@ body:has(#play:not([hidden])) .mascotte { display: none; }
 
 /* Écran d'attente des téléphones : la roue tourne sur elle-même en 3D */
 #lobby { padding-top: 16px; }
-.spin-wrap { perspective: 600px; margin: 40px auto 24px; }
-.spin {
-  width: 110px; height: auto;
-  filter: invert(1) drop-shadow(0 0 10px var(--accent));
-  animation: tourne 3s linear infinite;
-}
+.spin-wrap { perspective: 600px; width: 110px; height: 176px; margin: 32px auto 24px; }
+.spin { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: tourne 3s linear infinite; }
+.spin canvas { position: absolute; inset: 0; width: 100%; height: 100%; filter: invert(1) brightness(0.45); }
+.spin canvas.face { filter: invert(1) drop-shadow(0 0 8px var(--accent)); }
 @keyframes tourne { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 body:has(#lobby:not([hidden])) .mascotte { display: none; }
