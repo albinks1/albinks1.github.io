@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir</title>
-<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="style.css?v=20">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -44,14 +44,15 @@
   </section>
 
   <section id="reply" hidden>
+    <p id="rconsigne" class="muted"></p>
     <form id="rform" class="compose">
       <div class="chead"><b>Répondre</b><span id="rtimer" class="timer"></span></div>
       <div class="cline"><span>À</span><b id="rto"></b></div>
       <div class="cline"><span>Objet</span><b id="rsub"></b></div>
       <textarea id="rtext" maxlength="400" placeholder="Rédigez votre réponse" required></textarea>
       <div class="cfoot"><span id="rcount"></span><button>Envoyer</button></div>
+      <blockquote class="cquote"><p id="rqhead"></p><p id="rqbody"></p></blockquote>
     </form>
-    <p id="rconsigne" class="muted"></p>
   </section>
 </main>
 
@@ -94,6 +95,8 @@ function openReply(st) {
   $('rto').textContent = st.to;
   $('rsub').textContent = fr(st.subject);
   $('rconsigne').textContent = fr(st.consigne);
+  $('rqhead').textContent = st.date + ', ' + st.to + ' a écrit :';
+  $('rqbody').textContent = fr(st.body.replace('{prenom}', () => myName));   // le mail s'adresse au joueur par son pseudo
   $('rtext').value = '';
   $('rcount').textContent = '0 / 400';
   const end = Date.now() + st.time * 1000;
