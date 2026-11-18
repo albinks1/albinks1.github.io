@@ -49,7 +49,7 @@
       <p id="msit" class="situation"></p>
     </div>
     <button id="mget" data-s="situation">Suite</button>
-    <button id="mskip" data-s="situation">Pas le temps</button>
+    <button id="mskip" data-s="situation">Fin</button>
     <div class="mailbox arrive" data-s="inbox">
       <div class="mbar"><span>Boîte de réception</span><span>1 non lu</span></div>
       <button id="mrow" class="mrow"><b id="mfrom"></b><span id="mline"></span><span id="mdate"></span></button>
@@ -237,7 +237,7 @@ function startMail(q) {
   $('obody').textContent = fr(q.body.replace('{prenom}', () => q.to));   // au tableau : le prénom du mail
   $('mconsigne').textContent = fr(q.consigne);
   mailStep('situation');
-  $('mskip').hidden = !q.optionnel;   // mise en situation facultative : on peut passer au classement final
+  $('mskip').hidden = !q.optionnel;   // mise en situation facultative : « Fin » mène au classement final
   show('mail');
   game.child('state').set({ phase: 'mail', n: qi });
 }
@@ -321,15 +321,15 @@ function finishReplies() {
   ranks.forEach(([pid, p], k) => {
     const n = (p.notes || []).map(x => String(x).replace('.', ',') + ' / 10');
     upd['results/' + pid] = { score: p.score, rank: k + 1, total: ranks.length,
-      ...(n.length ? { mail: (n.length > 1 ? 'Réponses aux mails : ' : 'Réponse au mail : ') + n.join(' et ') } : {}) };
+      ...(n.length ? { mail: (n.length > 1 ? 'Réponses aux mails : ' : 'Réponse au mail : ') + n.join(', ') } : {}) };
   });
   game.update(upd);
   showRank();
 }
 
-function showRank() {
+function showRank(fin) {
   phase = 'rank';
-  const last = qi === questions.length - 1;
+  const last = fin === true || qi === questions.length - 1;
   $('rtitle').textContent = last ? 'Classement final' : 'Classement';
   $('ranking').replaceChildren(...sorted().slice(0, 10).map(([, p]) => {
     const li = el('li');
@@ -347,7 +347,7 @@ $('skip').onclick = endQuestion;
 $('toRank').onclick = showRank;
 $('next').onclick = nextQuestion;
 $('mget').onclick = () => mailStep('inbox');
-$('mskip').onclick = showRank;
+$('mskip').onclick = () => showRank(true);
 $('mrow').onclick = () => mailStep('open');
 $('mgo').onclick = startReplies;
 $('mclose').onclick = closeReplies;
