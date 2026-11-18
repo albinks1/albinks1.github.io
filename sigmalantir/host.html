@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir - Hôte</title>
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=23">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -45,10 +45,11 @@
 
   <section id="mail" hidden>
     <div data-s="situation inbox">
-      <h2>Mise en situation</h2>
+      <h2 id="mtitle"></h2>
       <p id="msit" class="situation"></p>
     </div>
     <button id="mget" data-s="situation">Suite</button>
+    <button id="mskip" data-s="situation">Pas le temps</button>
     <div class="mailbox arrive" data-s="inbox">
       <div class="mbar"><span>Boîte de réception</span><span>1 non lu</span></div>
       <button id="mrow" class="mrow"><b id="mfrom"></b><span id="mline"></span><span id="mdate"></span></button>
@@ -226,6 +227,7 @@ const mailStep = s => {
 
 function startMail(q) {
   phase = 'mail';
+  $('mtitle').textContent = q.titre || 'Mise en situation';
   $('msit').textContent = fr(q.situation);
   $('mfrom').textContent = q.from;
   $('mline').textContent = fr(q.subject);
@@ -235,6 +237,7 @@ function startMail(q) {
   $('obody').textContent = fr(q.body.replace('{prenom}', () => q.to));   // au tableau : le prénom du mail
   $('mconsigne').textContent = fr(q.consigne);
   mailStep('situation');
+  $('mskip').hidden = !q.optionnel;   // mise en situation facultative : on peut passer au classement final
   show('mail');
   game.child('state').set({ phase: 'mail', n: qi });
 }
@@ -277,7 +280,7 @@ function closeReplies() {
 
 function showReplies() {
   ansRef.off();
-  if (!answers.size) return showRank();
+  if (!answers.size) { replies = []; return finishReplies(); }
   phase = 'replies';
   replies = [...answers].map(([pid, r]) => ({ pid, name: players.get(pid).name, t: r.t, note: null }));
   ri = 0;
@@ -293,7 +296,7 @@ function renderReply() {
   $('rmeta').textContent = 'De : ' + r.name + ' | À : ' + q.from;
   $('rbody').textContent = r.t;
   $('rprev').disabled = ri === 0;
-  $('rnext').textContent = ri === replies.length - 1 ? 'Classement final' : 'Réponse suivante';
+  $('rnext').textContent = ri < replies.length - 1 ? 'Réponse suivante' : qi === questions.length - 1 ? 'Classement final' : 'Classement';
   $('rgrade').value = r.note ?? '';
   $('rnext').disabled = r.note === null;   // il faut noter la réponse avant de passer à la suite
   $('rgrade').focus();
@@ -307,12 +310,18 @@ function gradeReply() {
 
 // Les notes s'ajoutent au score du quiz, puis le classement final est envoyé aux téléphones
 function finishReplies() {
-  const unit = questions[qi].pointsParNote || 100, upd = {};
-  replies.forEach(r => players.get(r.pid).score += Math.round(r.note * unit));
+  const unit = questions[qi].pointsParNote || 100;
+  const upd = qi === questions.length - 1 ? {} : { state: { phase: 'interim', n: qi } };
+  replies.forEach(r => {
+    const p = players.get(r.pid);
+    p.score += Math.round(r.note * unit);
+    (p.notes = p.notes || []).push(r.note);
+  });
   const ranks = sorted();
   ranks.forEach(([pid, p], k) => {
-    const r = replies.find(x => x.pid === pid);
-    upd['results/' + pid] = { score: p.score, rank: k + 1, total: ranks.length, ...(r ? { mail: r.note } : {}) };
+    const n = (p.notes || []).map(x => String(x).replace('.', ',') + ' / 10');
+    upd['results/' + pid] = { score: p.score, rank: k + 1, total: ranks.length,
+      ...(n.length ? { mail: (n.length > 1 ? 'Réponses aux mails : ' : 'Réponse au mail : ') + n.join(' et ') } : {}) };
   });
   game.update(upd);
   showRank();
@@ -328,6 +337,7 @@ function showRank() {
     return li;
   }));
   $('next').hidden = last;
+  if (!last) $('next').textContent = questions[qi + 1].type === 'mail' ? questions[qi + 1].titre : 'Question suivante';
   if (last) game.child('state').set({ phase: 'end' });
   show('rank');
 }
@@ -337,6 +347,7 @@ $('skip').onclick = endQuestion;
 $('toRank').onclick = showRank;
 $('next').onclick = nextQuestion;
 $('mget').onclick = () => mailStep('inbox');
+$('mskip').onclick = showRank;
 $('mrow').onclick = () => mailStep('open');
 $('mgo').onclick = startReplies;
 $('mclose').onclick = closeReplies;
