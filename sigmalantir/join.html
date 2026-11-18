@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir</title>
-<link rel="stylesheet" href="style.css?v=16">
+<link rel="stylesheet" href="style.css?v=19">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -41,10 +41,17 @@
     <div class="head"><img class="head-logo" src="sigmalantir.svg" alt="Sigmalantir"><span id="pnum" class="muted"></span></div>
     <h2 id="ptext"></h2>
     <div id="btns" class="answers"></div>
-    <form id="noteform" hidden>
-      <input id="note" type="number" min="0" max="20" step="0.5" inputmode="decimal" placeholder="Note sur 20" required>
-      <button>Valider</button>
+  </section>
+
+  <section id="reply" hidden>
+    <form id="rform" class="compose">
+      <div class="chead"><b>Répondre</b><span id="rtimer" class="timer"></span></div>
+      <div class="cline"><span>À</span><b id="rto"></b></div>
+      <div class="cline"><span>Objet</span><b id="rsub"></b></div>
+      <textarea id="rtext" maxlength="400" placeholder="Rédigez votre réponse" required></textarea>
+      <div class="cfoot"><span id="rcount"></span><button>Envoyer</button></div>
     </form>
+    <p id="rconsigne" class="muted"></p>
   </section>
 </main>
 
@@ -55,7 +62,7 @@ const LETTERS = 'ABCD';
 // espace insécable avant ? ! : ; pour que la ponctuation ne parte pas seule à la ligne
 const fr = t => String(t).replace(/ ([?!:;])/g, '\u00a0$1');
 const db = firebase.initializeApp(FIREBASE_CONFIG).database();
-let game, pid, myName = '', answered = -1, current;
+let game, pid, myName = '', answered = -1, current, rTick;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const MSG = {
   ok: ['Bonne réponse.'],
@@ -68,7 +75,37 @@ function answer(data) {
   game.child('answers/' + current + '/' + pid).set(data);
   wait('Réponse envoyée', 'En attente des autres joueurs...');
 }
-$('noteform').onsubmit = e => { e.preventDefault(); answer({ n: Number($('note').value) }); };
+
+// Réponse au mail final : envoyée au clic, ou automatiquement à la fin du temps
+function sendReply() {
+  const t = $('rtext').value.trim();
+  if (!t || answered === current) return false;
+  answered = current;
+  clearInterval(rTick);
+  game.child('answers/' + current + '/' + pid).set({ t });
+  return true;
+}
+const replySent = () => wait('Réponse envoyée', 'Regardez le tableau.');
+$('rform').onsubmit = e => { e.preventDefault(); if (sendReply()) replySent(); };
+$('rtext').oninput = () => $('rcount').textContent = $('rtext').value.length + ' / 400';
+
+function openReply(st) {
+  current = st.n;
+  $('rto').textContent = st.to;
+  $('rsub').textContent = fr(st.subject);
+  $('rconsigne').textContent = fr(st.consigne);
+  $('rtext').value = '';
+  $('rcount').textContent = '0 / 400';
+  const end = Date.now() + st.time * 1000;
+  const update = () => {
+    const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+    $('rtimer').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+  };
+  update();
+  clearInterval(rTick);
+  rTick = setInterval(update, 250);
+  show('reply');
+}
 
 const code = new URLSearchParams(location.search).get('c');
 if (code) { $('code').value = code; $('name').focus(); }
@@ -155,10 +192,7 @@ function onState(st) {
     $('pnum').textContent = 'Question ' + (st.n + 1) + ' / ' + st.total;
     $('ptext').textContent = fr(st.q);
     current = st.n;
-    const note = st.type === 'note';
-    $('noteform').hidden = !note;
-    $('note').value = '';
-    $('btns').replaceChildren(...(note ? [] : st.c).map((c, i) => {
+    $('btns').replaceChildren(...st.c.map((c, i) => {
       const b = document.createElement('button');
       b.className = 'k' + i;
       const l = document.createElement('span');
@@ -169,16 +203,27 @@ function onState(st) {
       return b;
     }));
     show('play');
-  } else {
+  }
+  else if (st.phase === 'mail') wait('Regardez le tableau', 'Un nouveau mail vient d\'arriver.');
+  else if (st.phase === 'reply') {
+    if (answered === st.n) replySent();
+    else if ($('reply').hidden) openReply(st);
+  }
+  else if (st.phase === 'closing') {
+    clearInterval(rTick);
+    if (answered === st.n || (current === st.n && sendReply())) replySent();
+    else wait('Temps écoulé', 'Regardez le tableau.');
+  }
+  else if (st.phase === 'replies') wait('Réponses au tableau', 'Regardez le tableau.');
+  else {
     game.child('results/' + pid).get().then(s => showResult(s.val(), st.phase === 'end'));
   }
 }
 
 function showResult(d, end) {
-  if (!d) return wait(myName, 'Vous jouerez à la prochaine question.');
+  if (!d) return wait(end ? 'Partie terminée' : myName, end ? '' : 'Vous jouerez à la prochaine question.');
   const rank = 'Rang ' + d.rank + ' / ' + d.total;
   if (end) wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score);
-  else if (d.note) wait('Merci pour votre réponse.', '', d.score);
   else if (!d.answered) wait(pick(MSG.none), rank, d.score, 'ko');
   else if (d.poll) wait('Merci pour votre vote', rank, d.score, '', d.remark);
   else if (d.ok) wait(pick(MSG.ok), '+' + d.pts + ' pts - ' + rank, d.score, 'ok', d.remark);
