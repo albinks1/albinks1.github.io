@@ -314,3 +314,17 @@ body:has(#reply:not([hidden]))::after { display: none; }
 .mnav button, .rnote { margin-top: 14px; }
 .rnote { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; }
 .rnote input { display: inline-block; width: 110px; margin: 0; padding: 8px; font-size: 24px; }
+
+/* Bouton discret pour passer la mise en situation facultative */
+#mskip { background: transparent; color: var(--muted); border: 1px solid #33334a; padding: 7px 16px; margin-top: 12px; font-size: 15px; font-weight: 400; }
+
+/* Tableau : les mails les plus longs tiennent sans défilement */
+@media (min-width: 900px) {
+  body:has(#mail:not([hidden])) .mini-logo { height: 46px; margin-top: 6px; }
+  #mail { min-height: calc(100vh - var(--roue) * 1.5 - 60px); }
+  .mbody { font-size: clamp(15px, min(1.6vw, 2.4vh), 24px); line-height: 1.32; }
+  #mail[data-step="writing"] .mbody, #mail[data-step="closing"] .mbody { font-size: clamp(13px, min(1.15vw, 1.95vh), 18px); line-height: 1.25; }
+  .consigne { font-size: clamp(16px, 2.5vh, 23px); line-height: 1.25; margin: 6px auto; }
+  .mstatus { font-size: 18px; }
+  #mail > button { margin-top: 12px; }
+}
