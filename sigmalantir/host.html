@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir - Hôte</title>
-<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="style.css?v=20">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -45,10 +45,10 @@
 
   <section id="mail" hidden>
     <div data-s="situation inbox">
-      <h2>La situation</h2>
+      <h2>Mise en situation</h2>
       <p id="msit" class="situation"></p>
     </div>
-    <button id="mget" data-s="situation">Recevoir le mail</button>
+    <button id="mget" data-s="situation">Suite</button>
     <div class="mailbox arrive" data-s="inbox">
       <div class="mbar"><span>Boîte de réception</span><span>1 non lu</span></div>
       <button id="mrow" class="mrow"><b id="mfrom"></b><span id="mline"></span><span id="mdate"></span></button>
@@ -230,7 +230,7 @@ function startMail(q) {
   $('mdate').textContent = q.date;
   $('osub').textContent = fr(q.subject);
   $('ometa').textContent = 'De : ' + q.from + ' | À : ' + q.to + ' | ' + q.date;
-  $('obody').textContent = fr(q.body);
+  $('obody').textContent = fr(q.body.replace('{prenom}', () => q.to));   // au tableau : le prénom du mail
   $('mconsigne').textContent = fr(q.consigne);
   mailStep('situation');
   show('mail');
@@ -242,7 +242,7 @@ function startReplies() {
   phase = 'writing';
   $('mcount').textContent = '0 réponse(s) reçue(s)';
   mailStep('writing');
-  game.child('state').set({ phase: 'reply', n: qi, to: q.from, subject: 'Rép : ' + q.subject, consigne: q.consigne, time });
+  game.child('state').set({ phase: 'reply', n: qi, to: q.from, subject: 'Rép : ' + q.subject, consigne: q.consigne, date: q.date, body: q.body, time });
   ansRef = game.child('answers/' + qi);
   ansRef.on('child_added', s => onReply(s.key, s.val()));
   qStart = Date.now();
