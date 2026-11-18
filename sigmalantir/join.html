@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir</title>
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=26">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -43,6 +43,17 @@
     <div id="btns" class="answers"></div>
   </section>
 
+  <section id="chat" hidden>
+    <form id="cform" class="wa">
+      <div class="wa-head"><span id="cav" class="avatar"></span><div class="wa-who"><b id="cname"></b><small>en ligne</small></div><span id="ctimer" class="timer"></span></div>
+      <div id="cmsgs" class="wa-msgs"></div>
+      <div class="wa-bar">
+        <textarea id="ctext" rows="1" maxlength="400" placeholder="Message" required></textarea>
+        <button class="wa-send" aria-label="Envoyer"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 20.5 21 12 3 3.5v6.6L15 12 3 13.9z"/></svg></button>
+      </div>
+    </form>
+  </section>
+
   <section id="reply" hidden>
     <p id="rconsigne" class="muted"></p>
     <form id="rform" class="compose">
@@ -63,7 +74,7 @@ const LETTERS = 'ABCD';
 // espace insécable avant ? ! : ; pour que la ponctuation ne parte pas seule à la ligne
 const fr = t => String(t).replace(/ ([?!:;])/g, '\u00a0$1');
 const db = firebase.initializeApp(FIREBASE_CONFIG).database();
-let game, pid, myName = '', answered = -1, current, rTick;
+let game, pid, myName = '', answered = -1, current, rTick, rbox;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const MSG = {
   ok: ['Bonne réponse.'],
@@ -79,7 +90,7 @@ function answer(data) {
 
 // Réponse au mail final : envoyée au clic, ou automatiquement à la fin du temps
 function sendReply() {
-  const t = $('rtext').value.trim();
+  const t = rbox.value.trim();
   if (!t || answered === current) return false;
   answered = current;
   clearInterval(rTick);
@@ -94,26 +105,50 @@ function board(title, text) {
 }
 const replySent = () => board('Réponse envoyée', 'Regardez le tableau.');
 $('rform').onsubmit = e => { e.preventDefault(); if (sendReply()) replySent(); };
+$('cform').onsubmit = $('rform').onsubmit;
 $('rtext').oninput = () => $('rcount').textContent = $('rtext').value.length + ' / 400';
+$('ctext').oninput = () => { const c = $('ctext'); c.style.height = 'auto'; c.style.height = Math.min(c.scrollHeight, 120) + 'px'; };
 
 function openReply(st) {
   current = st.n;
-  $('rto').textContent = st.to;
-  $('rsub').textContent = fr(st.subject);
-  $('rconsigne').textContent = fr(st.consigne);
-  $('rqhead').textContent = st.date + ', ' + st.to + ' a écrit :';
-  $('rqbody').textContent = fr(st.body.replace('{prenom}', () => myName));   // le mail s'adresse au joueur par son pseudo
-  $('rtext').value = '';
-  $('rcount').textContent = '0 / 400';
+  const chat = st.canal === 'chat';
+  rbox = $(chat ? 'ctext' : 'rtext');
+  rbox.value = '';
+  rbox.style.height = '';
+  if (chat) {
+    const heure = st.date.split(', ').pop(), box = $('cmsgs');
+    $('cav').textContent = st.to[0];
+    $('cname').textContent = st.to;
+    box.replaceChildren(...st.messages.map(m => {
+      const b = document.createElement('div'), h = document.createElement('small');
+      b.className = 'bubble in';
+      b.textContent = fr(m.replace('{prenom}', () => myName));   // le message s'adresse au joueur par son pseudo
+      h.textContent = heure;
+      b.append(h);
+      return b;
+    }));
+    const notice = document.createElement('p');
+    notice.className = 'wa-notice';
+    notice.textContent = fr(st.consigne);
+    box.append(notice);
+  } else {
+    $('rto').textContent = st.to;
+    $('rsub').textContent = fr(st.subject);
+    $('rconsigne').textContent = fr(st.consigne);
+    $('rqhead').textContent = st.date + ', ' + st.to + ' a écrit :';
+    $('rqbody').textContent = fr(st.body.replace('{prenom}', () => myName));   // le mail s'adresse au joueur par son pseudo
+    $('rcount').textContent = '0 / 400';
+  }
   const end = Date.now() + st.time * 1000;
   const update = () => {
     const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
-    $('rtimer').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+    $('rtimer').textContent = $('ctimer').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
   };
   update();
   clearInterval(rTick);
   rTick = setInterval(update, 250);
-  show('reply');
+  show(chat ? 'chat' : 'reply');
+  if (chat) $('cmsgs').scrollTop = $('cmsgs').scrollHeight;
 }
 
 const code = new URLSearchParams(location.search).get('c');
@@ -213,7 +248,7 @@ function onState(st) {
   else if (st.phase === 'mail') board('Regardez le tableau', 'Un nouveau mail vient d\'arriver.');
   else if (st.phase === 'reply') {
     if (answered === st.n) replySent();
-    else if ($('reply').hidden) openReply(st);
+    else if ($('reply').hidden && $('chat').hidden) openReply(st);
   }
   else if (st.phase === 'closing') {
     clearInterval(rTick);

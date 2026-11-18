@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir - Hôte</title>
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=26">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -49,16 +49,19 @@
       <p id="msit" class="situation"></p>
     </div>
     <button id="mget" data-s="situation">Suite</button>
-    <button id="mskip" data-s="situation">Fin</button>
     <div class="mailbox arrive" data-s="inbox">
-      <div class="mbar"><span>Boîte de réception</span><span>1 non lu</span></div>
+      <div class="mbar"><span id="mbname"></span><span id="mbcount"></span></div>
       <button id="mrow" class="mrow"><b id="mfrom"></b><span id="mline"></span><span id="mdate"></span></button>
     </div>
     <div class="mstatus" data-s="writing closing">
       <span id="mcount"></span><span id="mtimer" class="timer"></span>
     </div>
     <p id="mconsigne" class="consigne" data-s="writing closing"></p>
-    <article class="mailbox" data-s="open writing closing">
+    <article class="chat only-chat" data-s="open writing closing">
+      <div class="chat-head"><span id="oav" class="avatar"></span><div><b id="oname"></b><small>en ligne</small></div></div>
+      <div id="omsgs" class="chat-msgs"></div>
+    </article>
+    <article class="mailbox only-mail" data-s="open writing closing">
       <h3 id="osub" class="msub"></h3>
       <p id="ometa" class="mmeta"></p>
       <p id="obody" class="mbody"></p>
@@ -67,7 +70,15 @@
     <button id="mclose" data-s="writing">Clore les réponses</button>
     <p class="muted" data-s="closing">Réception des dernières réponses...</p>
     <p id="rnum" class="muted" data-s="replies"></p>
-    <article class="mailbox" data-s="replies">
+    <article class="chat only-chat" data-s="replies">
+      <div class="chat-head"><span id="rcav" class="avatar"></span><div><b id="rcname"></b><small>en ligne</small></div></div>
+      <div class="chat-msgs">
+        <div id="rcin" class="bubble in"></div>
+        <p id="rcwho" class="rcwho"></p>
+        <div id="rcbody" class="bubble out"></div>
+      </div>
+    </article>
+    <article class="mailbox only-mail" data-s="replies">
       <h3 id="rsub" class="msub"></h3>
       <p id="rmeta" class="mmeta"></p>
       <p id="rbody" class="mbody"></p>
@@ -83,6 +94,7 @@
     <h1 id="rtitle">Classement</h1>
     <ol id="ranking" class="ranking"></ol>
     <button id="next">Question suivante</button>
+    <button id="fin" hidden>Fin</button>
   </section>
 </main>
 
@@ -229,15 +241,34 @@ function startMail(q) {
   phase = 'mail';
   $('mtitle').textContent = q.titre || 'Mise en situation';
   $('msit').textContent = fr(q.situation);
+  const chat = q.canal === 'chat', heure = q.date.split(', ').pop();
+  $('mail').dataset.canal = chat ? 'chat' : 'mail';
   $('mfrom').textContent = q.from;
-  $('mline').textContent = fr(q.subject);
-  $('mdate').textContent = q.date;
-  $('osub').textContent = fr(q.subject);
-  $('ometa').textContent = 'De : ' + q.from + ' | À : ' + q.to + ' | ' + q.date;
-  $('obody').textContent = fr(q.body.replace('{prenom}', () => q.to));   // au tableau : le prénom du mail
+  if (chat) {
+    const msgs = q.messages.map(m => fr(m.replace('{prenom}', () => q.to)));
+    $('mbname').textContent = 'Messages';
+    $('mbcount').textContent = msgs.length + ' non lus';
+    $('mline').textContent = msgs[0];
+    $('mdate').textContent = heure;
+    $('oav').textContent = $('rcav').textContent = q.from[0];
+    $('oname').textContent = $('rcname').textContent = q.from;
+    $('omsgs').replaceChildren(...msgs.map(m => {
+      const b = el('div', 'bubble in', m);
+      b.append(el('small', null, heure));
+      return b;
+    }));
+    $('rcin').textContent = msgs[msgs.length - 1];
+  } else {
+    $('mbname').textContent = 'Boîte de réception';
+    $('mbcount').textContent = '1 non lu';
+    $('mline').textContent = fr(q.subject);
+    $('mdate').textContent = q.date;
+    $('osub').textContent = fr(q.subject);
+    $('ometa').textContent = 'De : ' + q.from + ' | À : ' + q.to + ' | ' + q.date;
+    $('obody').textContent = fr(q.body.replace('{prenom}', () => q.to));   // au tableau : le prénom du mail
+  }
   $('mconsigne').textContent = fr(q.consigne);
   mailStep('situation');
-  $('mskip').hidden = !q.optionnel;   // mise en situation facultative : « Fin » mène au classement final
   show('mail');
   game.child('state').set({ phase: 'mail', n: qi });
 }
@@ -247,7 +278,8 @@ function startReplies() {
   phase = 'writing';
   $('mcount').textContent = '0 réponse(s) reçue(s)';
   mailStep('writing');
-  game.child('state').set({ phase: 'reply', n: qi, to: q.from, subject: 'Rép : ' + q.subject, consigne: q.consigne, date: q.date, body: q.body, time });
+  game.child('state').set({ phase: 'reply', n: qi, canal: q.canal || 'mail', to: q.from,
+    subject: q.subject ? 'Rép : ' + q.subject : '', consigne: q.consigne, date: q.date, body: q.body || '', messages: q.messages || [], time });
   ansRef = game.child('answers/' + qi);
   ansRef.on('child_added', s => onReply(s.key, s.val()));
   qStart = Date.now();
@@ -292,9 +324,14 @@ function showReplies() {
 function renderReply() {
   const q = questions[qi], r = replies[ri];
   $('rnum').textContent = 'Réponse ' + (ri + 1) + ' / ' + replies.length;
-  $('rsub').textContent = fr('Rép : ' + q.subject);
-  $('rmeta').textContent = 'De : ' + r.name + ' | À : ' + q.from;
-  $('rbody').textContent = r.t;
+  if (q.canal === 'chat') {
+    $('rcwho').textContent = 'Réponse de ' + r.name;
+    $('rcbody').textContent = r.t;
+  } else {
+    $('rsub').textContent = fr('Rép : ' + q.subject);
+    $('rmeta').textContent = 'De : ' + r.name + ' | À : ' + q.from;
+    $('rbody').textContent = r.t;
+  }
   $('rprev').disabled = ri === 0;
   $('rnext').textContent = ri < replies.length - 1 ? 'Réponse suivante' : qi === questions.length - 1 ? 'Classement final' : 'Classement';
   $('rgrade').value = r.note ?? '';
@@ -338,6 +375,7 @@ function showRank(fin) {
   }));
   $('next').hidden = last;
   if (!last) $('next').textContent = questions[qi + 1].type === 'mail' ? questions[qi + 1].titre : 'Question suivante';
+  $('fin').hidden = last || !questions[qi + 1].optionnel;   // « Fin » : classement définitif, la partie s'arrête ici
   if (last) game.child('state').set({ phase: 'end' });
   show('rank');
 }
@@ -347,7 +385,7 @@ $('skip').onclick = endQuestion;
 $('toRank').onclick = showRank;
 $('next').onclick = nextQuestion;
 $('mget').onclick = () => mailStep('inbox');
-$('mskip').onclick = () => showRank(true);
+$('fin').onclick = () => showRank(true);
 $('mrow').onclick = () => mailStep('open');
 $('mgo').onclick = startReplies;
 $('mclose').onclick = closeReplies;
