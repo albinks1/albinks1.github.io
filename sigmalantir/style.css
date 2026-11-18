@@ -328,3 +328,9 @@ body:has(#reply:not([hidden]))::after { display: none; }
   .mstatus { font-size: 18px; }
   #mail > button { margin-top: 12px; }
 }
+
+/* Tableau : logo de même taille que pendant les questions sur toutes les pages des mises en situation */
+@media (min-width: 900px) {
+  body:has(#mail:not([hidden])) .mini-logo { height: min(96px, 11vh); margin-top: 10px; }
+  #mail { min-height: calc(100vh - var(--roue) * 1.5 - min(96px, 11vh) - 18px); }
+}
