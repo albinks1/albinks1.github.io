@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir</title>
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -26,7 +26,7 @@
   <section id="lobby" hidden>
     <img class="logo" src="sigmalantir.svg" alt="Sigmalantir">
     <div class="spin-wrap"><div id="spin" class="spin"></div></div>
-    <h2>En attente d'autres adversaires</h2>
+    <h2 id="ltitle"></h2>
     <p id="lname" class="muted"></p>
   </section>
 
@@ -86,7 +86,13 @@ function sendReply() {
   game.child('answers/' + current + '/' + pid).set({ t });
   return true;
 }
-const replySent = () => wait('Réponse envoyée', 'Regardez le tableau.');
+// Écran avec la roue 3D : attente des joueurs et moments où il faut regarder le tableau
+function board(title, text) {
+  $('ltitle').textContent = title;
+  $('lname').textContent = text;
+  show('lobby');
+}
+const replySent = () => board('Réponse envoyée', 'Regardez le tableau.');
 $('rform').onsubmit = e => { e.preventDefault(); if (sendReply()) replySent(); };
 $('rtext').oninput = () => $('rcount').textContent = $('rtext').value.length + ' / 400';
 
@@ -186,10 +192,7 @@ setInterval(() => {
 
 function onState(st) {
   if (!st) return fail('La partie a été fermée.');
-  if (st.phase === 'lobby') {
-    $('lname').textContent = 'Connecté en tant que ' + myName;
-    show('lobby');
-  }
+  if (st.phase === 'lobby') board('En attente d\'autres adversaires', 'Connecté en tant que ' + myName);
   else if (st.phase === 'question') {
     if (answered === st.n) return wait('Réponse envoyée', 'En attente des autres joueurs...');
     $('pnum').textContent = 'Question ' + (st.n + 1) + ' / ' + st.total;
@@ -207,7 +210,7 @@ function onState(st) {
     }));
     show('play');
   }
-  else if (st.phase === 'mail') wait('Regardez le tableau', 'Un nouveau mail vient d\'arriver.');
+  else if (st.phase === 'mail') board('Regardez le tableau', 'Un nouveau mail vient d\'arriver.');
   else if (st.phase === 'reply') {
     if (answered === st.n) replySent();
     else if ($('reply').hidden) openReply(st);
@@ -215,9 +218,9 @@ function onState(st) {
   else if (st.phase === 'closing') {
     clearInterval(rTick);
     if (answered === st.n || (current === st.n && sendReply())) replySent();
-    else wait('Temps écoulé', 'Regardez le tableau.');
+    else board('Temps écoulé', 'Regardez le tableau.');
   }
-  else if (st.phase === 'replies') wait('Réponses au tableau', 'Regardez le tableau.');
+  else if (st.phase === 'replies') board('Regardez le tableau', 'Les réponses sont en cours de lecture.');
   else {
     game.child('results/' + pid).get().then(s => showResult(s.val(), st.phase === 'end'));
   }
@@ -226,7 +229,8 @@ function onState(st) {
 function showResult(d, end) {
   if (!d) return wait(end ? 'Partie terminée' : myName, end ? '' : 'Vous jouerez à la prochaine question.');
   const rank = 'Rang ' + d.rank + ' / ' + d.total;
-  if (end) wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score);
+  if (end) wait('Partie terminée', 'Classement final : ' + d.rank + ' / ' + d.total, d.score, '',
+    d.mail != null ? 'Réponse au mail : ' + String(d.mail).replace('.', ',') + ' / 10' : '');
   else if (!d.answered) wait(pick(MSG.none), rank, d.score, 'ko');
   else if (d.poll) wait('Merci pour votre vote', rank, d.score, '', d.remark);
   else if (d.ok) wait(pick(MSG.ok), '+' + d.pts + ' pts - ' + rank, d.score, 'ok', d.remark);

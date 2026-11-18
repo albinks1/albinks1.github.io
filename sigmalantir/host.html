@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir - Hôte</title>
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -73,6 +73,7 @@
     </article>
     <div class="mnav" data-s="replies">
       <button id="rprev">Réponse précédente</button>
+      <label class="rnote">Note <input id="rgrade" type="number" min="0" max="10" step="0.5" inputmode="decimal" placeholder="0 à 10"> / 10</label>
       <button id="rnext">Réponse suivante</button>
     </div>
   </section>
@@ -278,7 +279,7 @@ function showReplies() {
   ansRef.off();
   if (!answers.size) return showRank();
   phase = 'replies';
-  replies = [...answers].map(([pid, r]) => ({ name: players.get(pid).name, t: r.t }));
+  replies = [...answers].map(([pid, r]) => ({ pid, name: players.get(pid).name, t: r.t, note: null }));
   ri = 0;
   mailStep('replies');
   game.child('state').set({ phase: 'replies', n: qi });
@@ -293,6 +294,28 @@ function renderReply() {
   $('rbody').textContent = r.t;
   $('rprev').disabled = ri === 0;
   $('rnext').textContent = ri === replies.length - 1 ? 'Classement final' : 'Réponse suivante';
+  $('rgrade').value = r.note ?? '';
+  $('rnext').disabled = r.note === null;   // il faut noter la réponse avant de passer à la suite
+  $('rgrade').focus();
+}
+
+function gradeReply() {
+  const g = $('rgrade'), valid = g.value !== '' && g.validity.valid;
+  replies[ri].note = valid ? Number(g.value) : null;
+  $('rnext').disabled = !valid;
+}
+
+// Les notes s'ajoutent au score du quiz, puis le classement final est envoyé aux téléphones
+function finishReplies() {
+  const unit = questions[qi].pointsParNote || 100, upd = {};
+  replies.forEach(r => players.get(r.pid).score += Math.round(r.note * unit));
+  const ranks = sorted();
+  ranks.forEach(([pid, p], k) => {
+    const r = replies.find(x => x.pid === pid);
+    upd['results/' + pid] = { score: p.score, rank: k + 1, total: ranks.length, ...(r ? { mail: r.note } : {}) };
+  });
+  game.update(upd);
+  showRank();
 }
 
 function showRank() {
@@ -318,7 +341,9 @@ $('mrow').onclick = () => mailStep('open');
 $('mgo').onclick = startReplies;
 $('mclose').onclick = closeReplies;
 $('rprev').onclick = () => { ri--; renderReply(); };
-$('rnext').onclick = () => { if (ri < replies.length - 1) { ri++; renderReply(); } else showRank(); };
+$('rnext').onclick = () => { if (ri < replies.length - 1) { ri++; renderReply(); } else finishReplies(); };
+$('rgrade').oninput = gradeReply;
+$('rgrade').onkeydown = e => { if (e.key === 'Enter' && !$('rnext').disabled) $('rnext').click(); };
 </script>
 <script src="anim.js?v=4"></script>
 </body>
