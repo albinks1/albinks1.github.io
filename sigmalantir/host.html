@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir - Hôte</title>
-<link rel="stylesheet" href="style.css?v=16">
+<link rel="stylesheet" href="style.css?v=19">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -43,6 +43,40 @@
     <button id="toRank">Classement</button>
   </section>
 
+  <section id="mail" hidden>
+    <div data-s="situation inbox">
+      <h2>La situation</h2>
+      <p id="msit" class="situation"></p>
+    </div>
+    <button id="mget" data-s="situation">Recevoir le mail</button>
+    <div class="mailbox arrive" data-s="inbox">
+      <div class="mbar"><span>Boîte de réception</span><span>1 non lu</span></div>
+      <button id="mrow" class="mrow"><b id="mfrom"></b><span id="mline"></span><span id="mdate"></span></button>
+    </div>
+    <div class="mstatus" data-s="writing closing">
+      <span id="mcount"></span><span id="mtimer" class="timer"></span>
+    </div>
+    <p id="mconsigne" class="consigne" data-s="writing closing"></p>
+    <article class="mailbox" data-s="open writing closing">
+      <h3 id="osub" class="msub"></h3>
+      <p id="ometa" class="mmeta"></p>
+      <p id="obody" class="mbody"></p>
+    </article>
+    <button id="mgo" data-s="open">Lancer les réponses</button>
+    <button id="mclose" data-s="writing">Clore les réponses</button>
+    <p class="muted" data-s="closing">Réception des dernières réponses...</p>
+    <p id="rnum" class="muted" data-s="replies"></p>
+    <article class="mailbox" data-s="replies">
+      <h3 id="rsub" class="msub"></h3>
+      <p id="rmeta" class="mmeta"></p>
+      <p id="rbody" class="mbody"></p>
+    </article>
+    <div class="mnav" data-s="replies">
+      <button id="rprev">Réponse précédente</button>
+      <button id="rnext">Réponse suivante</button>
+    </div>
+  </section>
+
   <section id="rank" hidden>
     <h1 id="rtitle">Classement</h1>
     <ol id="ranking" class="ranking"></ol>
@@ -61,7 +95,9 @@ const db = firebase.initializeApp(FIREBASE_CONFIG).database();
 
 let questions = [], qi = -1, phase = 'lobby', qStart = 0, tick = null, game, ansRef;
 const players = new Map();   // identifiant du téléphone -> { name, score, on }
-let answers = new Map();     // identifiant -> { i, pts }
+let answers = new Map();     // identifiant -> { i, pts } (ou { t } pour le mail)
+let replies = [], ri = 0;    // réponses au mail, affichées une par une
+const MAX_REPLY = 400;
 
 const online = () => [...players.values()].filter(p => p.on).length;
 const sorted = () => [...players.entries()].sort((a, b) => b[1].score - a[1].score);
@@ -90,6 +126,7 @@ async function openRoom() {
     players.set(s.key, p);
     renderPlayers();
     if (phase === 'question' && online() && answers.size >= online()) endQuestion();
+    if (phase === 'writing' && online() && answers.size >= online()) closeReplies();
   };
   game.child('players').on('child_added', onPlayer);
   game.child('players').on('child_changed', onPlayer);
@@ -99,9 +136,7 @@ openRoom().catch(e => $('status').textContent = 'Erreur Firebase : ' + e.message
 function onAnswer(pid, v) {
   const p = players.get(pid), q = questions[qi];
   if (!p || phase !== 'question' || answers.has(pid)) return;
-  const valid = q.type === 'note' ? v && v.n >= 0 && v.n <= 20
-    : v && Number.isInteger(v.i) && v.i >= 0 && v.i < q.c.length;
-  if (!valid) return;
+  if (!v || !Number.isInteger(v.i) || v.i < 0 || v.i >= q.c.length) return;
   const ratio = Math.min((Date.now() - qStart) / 1000 / q.time, 1);
   const pts = 'a' in q && v.i === q.a ? Math.round(1000 * (1 - ratio / 2)) : 0;
   answers.set(pid, { i: v.i, pts });
@@ -118,21 +153,20 @@ function renderPlayers() {
 function nextQuestion() {
   qi++;
   const q = questions[qi];
-  q.time = q.time || 20;
   answers = new Map();
+  if (q.type === 'mail') return startMail(q);
+  q.time = q.time || 20;
   phase = 'question';
   $('qnum').textContent = 'Question ' + (qi + 1) + ' / ' + questions.length;
   $('qtext').textContent = fr(q.q);
   $('answered').textContent = '0 réponse(s)';
-  $('choices').replaceChildren(...(q.type === 'note'
-    ? [el('li', 'k1', 'Donnez une note de 0 à 20 sur votre téléphone')]
-    : q.c.map((c, i) => {
-      const li = el('li', 'k' + i);
-      li.append(el('span', 'letter', LETTERS[i]), el('span', null, c));
-      return li;
-    })));
+  $('choices').replaceChildren(...q.c.map((c, i) => {
+    const li = el('li', 'k' + i);
+    li.append(el('span', 'letter', LETTERS[i]), el('span', null, c));
+    return li;
+  }));
   show('question');
-  game.child('state').set({ phase: 'question', n: qi, total: questions.length, q: q.q, c: q.c || [], type: q.type || 'choix' });
+  game.child('state').set({ phase: 'question', n: qi, total: questions.length, q: q.q, c: q.c });
   qStart = Date.now();
   ansRef = game.child('answers/' + qi);
   ansRef.on('child_added', s => onAnswer(s.key, s.val()));
@@ -150,15 +184,15 @@ function endQuestion() {
   phase = 'stats';
   clearInterval(tick);
   ansRef.off();
-  const q = questions[qi], poll = !('a' in q), note = q.type === 'note';
-  const counts = (q.c || []).map(() => 0);
-  answers.forEach((r, pid) => { if (!note) counts[r.i]++; players.get(pid).score += r.pts; });
+  const q = questions[qi], poll = !('a' in q);
+  const counts = q.c.map(() => 0);
+  answers.forEach((r, pid) => { counts[r.i]++; players.get(pid).score += r.pts; });
   // Résultats de chaque joueur puis changement d'état, en une seule écriture
   const upd = { state: { phase: 'result', n: qi } };
   const ranks = sorted();
   ranks.forEach(([pid, p], k) => {
     const r = answers.get(pid);
-    upd['results/' + pid] = { poll, note, answered: !!r, ok: !poll && !!r && r.i === q.a,
+    upd['results/' + pid] = { poll, answered: !!r, ok: !poll && !!r && r.i === q.a,
       pts: r ? r.pts : 0, score: p.score, rank: k + 1, total: ranks.length,
       // remarque propre à la question : par choix (sondage) ou selon bonne / mauvaise réponse
       remark: (!r ? '' : q.r ? q.r[r.i] : r.i === q.a ? q.ok : q.ko) || '' };
@@ -166,11 +200,6 @@ function endQuestion() {
   game.update(upd);
 
   $('stext').textContent = fr(q.q);
-  if (note) {   // quelle que soit la vraie moyenne...
-    $('bars').replaceChildren(el('p', 'note-txt', 'Résultats du sondage'), el('p', 'note-big', '20/20'),
-      el('p', 'note-txt muted', 'Moyenne des ' + answers.size + ' réponse(s)'));
-    return show('stats');
-  }
   const max = Math.max(1, ...counts);
   $('bars').replaceChildren(...q.c.map((c, i) => {
     const row = el('div', 'row' + (poll ? '' : i === q.a ? ' good' : ' dim'));
@@ -185,6 +214,84 @@ function endQuestion() {
   }));
   if (q.e) $('bars').append(el('p', 'explain', q.e));
   show('stats');
+}
+
+// Séquence finale : situation, mail reçu, mail ouvert, rédaction sur les téléphones, réponses au tableau
+const mailStep = s => {
+  $('mail').dataset.step = s;
+  document.querySelectorAll('#mail [data-s]').forEach(e => e.hidden = !e.dataset.s.split(' ').includes(s));
+};
+
+function startMail(q) {
+  phase = 'mail';
+  $('msit').textContent = fr(q.situation);
+  $('mfrom').textContent = q.from;
+  $('mline').textContent = fr(q.subject);
+  $('mdate').textContent = q.date;
+  $('osub').textContent = fr(q.subject);
+  $('ometa').textContent = 'De : ' + q.from + ' | À : ' + q.to + ' | ' + q.date;
+  $('obody').textContent = fr(q.body);
+  $('mconsigne').textContent = fr(q.consigne);
+  mailStep('situation');
+  show('mail');
+  game.child('state').set({ phase: 'mail', n: qi });
+}
+
+function startReplies() {
+  const q = questions[qi], time = q.time || 90;
+  phase = 'writing';
+  $('mcount').textContent = '0 réponse(s) reçue(s)';
+  mailStep('writing');
+  game.child('state').set({ phase: 'reply', n: qi, to: q.from, subject: 'Rép : ' + q.subject, consigne: q.consigne, time });
+  ansRef = game.child('answers/' + qi);
+  ansRef.on('child_added', s => onReply(s.key, s.val()));
+  qStart = Date.now();
+  const update = () => {
+    const left = Math.max(0, Math.ceil(time - (Date.now() - qStart) / 1000));
+    $('mtimer').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+    if (left <= 0) closeReplies();
+  };
+  update();
+  tick = setInterval(update, 200);
+}
+
+function onReply(pid, v) {
+  const t = String(v && v.t || '').trim().slice(0, MAX_REPLY);
+  if (!players.has(pid) || !t || answers.has(pid) || (phase !== 'writing' && phase !== 'closing')) return;
+  answers.set(pid, { t });
+  $('mcount').textContent = answers.size + ' réponse(s) reçue(s)';
+  if (phase === 'writing' && answers.size >= online()) closeReplies();
+}
+
+// Les téléphones envoient alors leur brouillon : on leur laisse 3 secondes avant d'afficher les réponses
+function closeReplies() {
+  if (phase !== 'writing') return;
+  phase = 'closing';
+  clearInterval(tick);
+  mailStep('closing');
+  game.child('state').set({ phase: 'closing', n: qi });
+  setTimeout(showReplies, 3000);
+}
+
+function showReplies() {
+  ansRef.off();
+  if (!answers.size) return showRank();
+  phase = 'replies';
+  replies = [...answers].map(([pid, r]) => ({ name: players.get(pid).name, t: r.t }));
+  ri = 0;
+  mailStep('replies');
+  game.child('state').set({ phase: 'replies', n: qi });
+  renderReply();
+}
+
+function renderReply() {
+  const q = questions[qi], r = replies[ri];
+  $('rnum').textContent = 'Réponse ' + (ri + 1) + ' / ' + replies.length;
+  $('rsub').textContent = fr('Rép : ' + q.subject);
+  $('rmeta').textContent = 'De : ' + r.name + ' | À : ' + q.from;
+  $('rbody').textContent = r.t;
+  $('rprev').disabled = ri === 0;
+  $('rnext').textContent = ri === replies.length - 1 ? 'Classement final' : 'Réponse suivante';
 }
 
 function showRank() {
@@ -205,6 +312,12 @@ $('start').onclick = nextQuestion;
 $('skip').onclick = endQuestion;
 $('toRank').onclick = showRank;
 $('next').onclick = nextQuestion;
+$('mget').onclick = () => mailStep('inbox');
+$('mrow').onclick = () => mailStep('open');
+$('mgo').onclick = startReplies;
+$('mclose').onclick = closeReplies;
+$('rprev').onclick = () => { ri--; renderReply(); };
+$('rnext').onclick = () => { if (ri < replies.length - 1) { ri++; renderReply(); } else showRank(); };
 </script>
 <script src="anim.js?v=4"></script>
 </body>
