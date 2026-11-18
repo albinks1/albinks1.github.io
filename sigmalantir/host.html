@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sigmalantir - Hôte</title>
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js"></script>
@@ -49,8 +49,17 @@
       <p id="msit" class="situation"></p>
     </div>
     <button id="mget" data-s="situation">Suite</button>
-    <div class="mailbox arrive" data-s="inbox">
-      <div class="mbar"><span id="mbname"></span><span id="mbcount"></span></div>
+    <button id="mnotif" class="notif only-chat" data-s="inbox">
+      <span class="notif-icon"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="#fff" d="M12 3C6.9 3 3 6.5 3 10.9c0 2.5 1.3 4.7 3.3 6.2L5.5 21l4.1-2.2c.8.2 1.6.3 2.4.3 5.1 0 9-3.6 9-8.2S17.1 3 12 3z"/></svg></span>
+      <span class="notif-text">
+        <span class="notif-top"><span>MESSAGES</span><span>maintenant</span></span>
+        <b id="nfrom"></b>
+        <span id="nline" class="notif-line"></span>
+        <span id="nmore" class="notif-more"></span>
+      </span>
+    </button>
+    <div class="mailbox arrive only-mail" data-s="inbox">
+      <div class="mbar"><span>Boîte de réception</span><span>1 non lu</span></div>
       <button id="mrow" class="mrow"><b id="mfrom"></b><span id="mline"></span><span id="mdate"></span></button>
     </div>
     <div class="mstatus" data-s="writing closing">
@@ -243,13 +252,11 @@ function startMail(q) {
   $('msit').textContent = fr(q.situation);
   const chat = q.canal === 'chat', heure = q.date.split(', ').pop();
   $('mail').dataset.canal = chat ? 'chat' : 'mail';
-  $('mfrom').textContent = q.from;
   if (chat) {
     const msgs = q.messages.map(m => fr(m.replace('{prenom}', () => q.to)));
-    $('mbname').textContent = 'Messages';
-    $('mbcount').textContent = msgs.length + ' non lus';
-    $('mline').textContent = msgs[0];
-    $('mdate').textContent = heure;
+    $('nfrom').textContent = q.from;
+    $('nline').textContent = msgs[msgs.length - 1];
+    $('nmore').textContent = (msgs.length - 1) + ' autres messages';
     $('oav').textContent = $('rcav').textContent = q.from[0];
     $('oname').textContent = $('rcname').textContent = q.from;
     $('omsgs').replaceChildren(...msgs.map(m => {
@@ -259,8 +266,7 @@ function startMail(q) {
     }));
     $('rcin').textContent = msgs[msgs.length - 1];
   } else {
-    $('mbname').textContent = 'Boîte de réception';
-    $('mbcount').textContent = '1 non lu';
+    $('mfrom').textContent = q.from;
     $('mline').textContent = fr(q.subject);
     $('mdate').textContent = q.date;
     $('osub').textContent = fr(q.subject);
@@ -386,7 +392,7 @@ $('toRank').onclick = showRank;
 $('next').onclick = nextQuestion;
 $('mget').onclick = () => mailStep('inbox');
 $('fin').onclick = () => showRank(true);
-$('mrow').onclick = () => mailStep('open');
+$('mrow').onclick = $('mnotif').onclick = () => mailStep('open');
 $('mgo').onclick = startReplies;
 $('mclose').onclick = closeReplies;
 $('rprev').onclick = () => { ri--; renderReply(); };
