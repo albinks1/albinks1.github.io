@@ -232,6 +232,18 @@
   footer .up:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
   @media (max-width: 800px) { footer .cols { grid-template-columns: 1fr 1fr; } footer .brand { grid-column: 1 / -1; } }
 
+  /* ── Easter eggs ─────────────────────────── */
+  .hero .photo { user-select: none; -webkit-user-select: none; }
+  .egg-roll { position: fixed; left: 100%; bottom: 0; z-index: 60; width: 70px; height: auto; pointer-events: none; animation: roule 5s linear forwards; }
+  @keyframes roule { to { transform: translateX(calc(-100vw - 100%)); } }
+  .egg-spin { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; align-content: center; background: rgba(251,251,253,.55); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); opacity: 0; transition: opacity .4s; cursor: pointer; }
+  .egg-spin.on { opacity: 1; }
+  .egg-wrap { perspective: 600px; width: 110px; height: 176px; filter: drop-shadow(0 14px 26px rgba(var(--red-rgb), .35)); }
+  .egg-rot { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: tourne 3s linear infinite; }
+  .egg-rot canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  @keyframes tourne { to { transform: rotateY(360deg); } }
+  .egg-spin p { margin-top: 1.75rem; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+
   @media print { nav, .read, footer, .drawer { display: none; } details::details-content { height: auto; } }
 </style>
 </head>
@@ -698,6 +710,8 @@
   <div class="pages"></div>
 </aside>
 
+<script src="egg/sigma-frames.js" defer></script>
+<script src="egg/egg.js" defer></script>
 <script type="module">
 const root = document.documentElement;
 
