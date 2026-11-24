@@ -5,179 +5,269 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Albin Planeille — Portfolio</title>
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
 <style>
   :root {
     --ink: #111;
-    --mute: #707070;
+    --mute: #6b6b6b;
     --rule: #dcdcdc;
     --soft: #f3f3f1;
     --bg: #fff;
-    --red: #e3000f;
+    --red: #1d5c45;
+    --red-rgb: 29, 92, 69;
     --max: 72rem;
     --gut: clamp(1rem, 4vw, 3rem);
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --r: 14px;
+    --rs: 999px;
+    --dw: min(52rem, 48vw);
+    interpolate-size: allow-keywords;
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
   a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
   h1, h2, h3, p, figure { margin: 0; }
-  ul { margin: 0; padding-left: 1.1rem; }
+  ul, ol { margin: 0; padding-left: 1.1rem; }
   li { margin-bottom: 0.35rem; }
   img { max-width: 100%; }
+  button { font: inherit; color: inherit; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.85em; }
   .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gut); }
-  .todo { color: var(--red); }
   .mute { color: var(--mute); }
   .k { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mute); margin-bottom: 0.3rem; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } html { scroll-behavior: auto; } }
 
   /* Bilingue : on n'affiche que la langue active */
   html[data-lang="fr"] body [lang="en"], html[data-lang="en"] body [lang="fr"] { display: none !important; }
 
-  /* ── Accueil ─────────────────────────────── */
-  .hero { padding-top: var(--gut); padding-bottom: 2rem; }
-  .hero .top { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
-  .hero .top > span:first-child::before { content: ""; display: inline-block; width: 0.7em; height: 0.7em; background: var(--red); margin-right: 0.6em; vertical-align: -0.05em; }
-  .hero .mid { display: flex; justify-content: space-between; align-items: center; gap: var(--gut); padding: 2.5rem 0 2rem; }
-  .hero h1 { font-size: 1.15rem; font-weight: 700; }
-  .hero .role { color: var(--mute); font-size: 0.95rem; }
-  .hero .photo { flex: none; width: 9rem; aspect-ratio: 1 / 1; background: var(--soft); overflow: hidden; }
-  .hero .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .hero .bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gut); border-top: 1px solid var(--ink); padding-top: 1rem; font-size: 0.9rem; }
-  @media (max-width: 800px) {
-    .hero .mid { flex-direction: column-reverse; align-items: flex-start; }
-    .hero .photo { width: 7rem; }
-    .hero .bottom { grid-template-columns: 1fr; gap: 1rem; }
-  }
+  /* Sigles : définition au survol ou au toucher */
+  abbr[data-t] { text-decoration: underline dotted; text-decoration-color: #999; text-underline-offset: 3px; cursor: help; position: relative; outline: none; }
+  abbr[data-t]::after { content: attr(data-t); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translate(-50%, 4px); width: max-content; max-width: 18rem; background: rgba(17,17,17,.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fff; font-size: 0.75rem; font-weight: 400; line-height: 1.35; letter-spacing: 0; text-transform: none; padding: 0.35rem 0.6rem; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s var(--ease); z-index: 30; }
+  abbr[data-t]:hover::after, abbr[data-t]:focus::after { opacity: 1; transform: translate(-50%, 0); }
 
-  /* ── Sommaire + langue ───────────────────── */
-  nav { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--ink); }
+  /* ── Accueil : bandeau dégradé, tuiles en verre ── */
+  .hero-band { position: relative; overflow: hidden; background: #fbfbfd; border-bottom: 1px solid rgba(0,0,0,.06); }
+  .hero-band::before { content: ""; position: absolute; inset: -40%; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(38% 45% at 78% 22%, rgba(0,113,227,.13), transparent 70%),
+      radial-gradient(30% 40% at 18% 8%, rgba(29,92,69,.07), transparent 70%),
+      radial-gradient(35% 40% at 55% 95%, rgba(94,92,230,.08), transparent 70%);
+    animation: drift 24s ease-in-out infinite alternate; }
+  @keyframes drift { from { transform: translate3d(0,0,0) rotate(0deg); } to { transform: translate3d(-4%,3%,0) rotate(6deg); } }
+  .hero-band::after, footer::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .045; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
+  footer { position: relative; }
+  .hero { position: relative; z-index: 1; padding-top: 1.5rem; padding-bottom: 2.5rem; }
+  .hero .top { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mute); }
+  .hero .top > span:first-child { color: var(--ink); }
+  .hero .top > span:first-child::before { content: ""; display: inline-block; width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--red); margin-right: 0.6em; vertical-align: 0.05em; }
+  .hero .mid { display: flex; align-items: center; gap: 1.5rem; padding: 3rem 0 2.25rem; }
+  .hero .photo { flex: none; width: 6.5rem; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 22px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 14px 34px -12px rgba(0,0,0,.25); }
+  .hero .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .hero h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+  .hero .role { color: var(--mute); font-size: 1rem; margin-top: 0.15rem; }
+  .hero .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .hero .tile { background: rgba(255,255,255,.6); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); border: 1px solid rgba(255,255,255,.8); border-radius: 18px; padding: 1rem 1.15rem; font-size: 0.88rem; line-height: 1.45; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 10px 28px -14px rgba(0,0,0,.18); }
+  .hero .tile .k { display: flex; align-items: center; gap: 0.45rem; }
+  .hero .tile .k i { font-size: 0.95rem; color: var(--ink); }
+  @media (max-width: 800px) { .hero .tiles { grid-template-columns: 1fr; } .hero .mid { padding-top: 2rem; } }
+
+  /* ── Sommaire + langue (verre dépoli) ────── */
+  nav { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.62); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); border-bottom: 1px solid rgba(17,17,17,.85); }
   nav .wrap { display: flex; align-items: center; gap: 1.5rem; padding-top: 0.9rem; padding-bottom: 0.9rem; font-size: 1rem; }
   nav .links { display: flex; gap: 1.5rem; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex: 1; }
-  nav .links a { text-decoration: none; color: var(--mute); }
-  nav .links a b { font-weight: 400; color: #a0a0a0; margin-right: 0.35rem; }
+  nav .links a { text-decoration: none; color: var(--mute); transition: color .2s; }
+  nav .links a b { font-weight: 400; color: #a0a0a0; margin-right: 0.35rem; transition: color .2s; }
   nav .links a:hover, nav .links a.on { color: var(--ink); }
   nav .links a.on b { color: var(--red); }
-  .lang { flex: none; display: inline-flex; border: 1px solid var(--ink); }
-  .lang button { font: inherit; font-size: 0.8rem; letter-spacing: 0.06em; background: none; border: 0; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--ink); }
+  nav .progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(var(--p, 0)); background: linear-gradient(90deg, rgba(var(--red-rgb), .35), var(--red)); }
+  .lang { flex: none; display: inline-flex; border: 1px solid var(--ink); border-radius: var(--rs); overflow: hidden; }
+  .lang button { font-size: 0.8rem; letter-spacing: 0.06em; background: none; border: 0; padding: 0.25rem 0.6rem; cursor: pointer; transition: background .2s, color .2s; }
   .lang button + button { border-left: 1px solid var(--ink); }
   .lang button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 
   /* ── Sections ────────────────────────────── */
-  section { padding: 6rem 0 2rem; scroll-margin-top: 2rem; }
+  section { padding: 6rem 0 2rem; }
   .sec { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gut); }
   .sec > .head { grid-column: 1 / 4; }
   .sec > .body { grid-column: 4 / 13; min-width: 0; }
-  .num { font-size: 0.8rem; font-weight: 700; color: var(--red); letter-spacing: 0.04em; }
-  .head h2 { font-size: clamp(1.4rem, 2.2vw, 1.8rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-top: 0.5rem; }
+  .num::after { content: ""; display: block; width: 1.6rem; height: 2px; margin-top: 0.7rem; background: linear-gradient(90deg, var(--red), rgba(var(--red-rgb), 0)); }
+  .num { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 700; color: var(--red); letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .head h2 { font-size: clamp(1.4rem, 2.2vw, 1.8rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-top: 0.6rem; }
   @media (min-width: 801px) { .sec > .head { position: sticky; top: 5rem; align-self: start; } }
   @media (max-width: 800px) { .sec > .head, .sec > .body { grid-column: 1 / -1; } section { padding-top: 4rem; } }
   .lead { font-size: clamp(1.2rem, 1.9vw, 1.5rem); line-height: 1.35; letter-spacing: -0.01em; }
   .body > p + p { margin-top: 1.1rem; }
-  .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mute); margin: 2.5rem 0 0.75rem; }
+  .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mute); margin: 3rem 0 0.75rem; }
   .label:first-child { margin-top: 0; }
 
-  /* ── Compétences ─────────────────────────── */
-  .sk { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 1px 0 0 1px; }
-  .sk > div { border: 1px solid var(--ink); margin: -1px 0 0 -1px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; }
-  .sk .c { font-size: 0.72rem; letter-spacing: 0.08em; color: var(--red); font-weight: 700; }
-  .sk .t { font-weight: 700; line-height: 1.25; }
-  .sk .d { font-size: 0.85rem; line-height: 1.45; }
-  .sk .p { font-size: 0.8rem; color: var(--mute); margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--rule); }
+  /* ── Compétences : blocs ─────────────────── */
+  .sk { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
+  .sk .card { --tint: 0, 113, 227; --mx: 50%; --my: 0%; position: relative; isolation: isolate; border: 1px solid rgba(0,0,0,.06); border-radius: 18px; padding: 1.35rem; display: flex; flex-direction: column; gap: 0.5rem;
+    background:
+      radial-gradient(420px circle at var(--mx) var(--my), rgba(var(--tint), .10), transparent 60%),
+      linear-gradient(160deg, rgba(var(--tint), .07) 0%, rgba(255,255,255,0) 55%),
+      #fff;
+    box-shadow: 0 1px 1px rgba(0,0,0,.03), 0 2px 6px rgba(0,0,0,.04), 0 12px 32px -12px rgba(var(--tint), .18);
+    transition: box-shadow .4s var(--ease), transform .4s var(--ease); }
+  .sk .card:hover { transform: translateY(-3px); box-shadow: 0 1px 1px rgba(0,0,0,.03), 0 4px 10px rgba(0,0,0,.05), 0 22px 48px -14px rgba(var(--tint), .28); }
+  .sk .card:nth-child(1) { --tint: 0, 113, 227; }
+  .sk .card:nth-child(2) { --tint: 94, 92, 230; }
+  .sk .card:nth-child(3) { --tint: 0, 150, 136; }
+  .sk.soft .card:nth-child(1) { --tint: 255, 149, 0; }
+  .sk.soft .card:nth-child(2) { --tint: 175, 82, 222; }
+  .sk.soft .card:nth-child(3) { --tint: 52, 168, 83; }
+  .sk .c { font-size: 0.72rem; font-weight: 700; color: rgb(var(--tint)); letter-spacing: 0.06em; }
+  .sk h3 { font-size: 1.02rem; font-weight: 700; line-height: 1.25; }
+  .sk .d { font-size: 0.84rem; color: var(--mute); line-height: 1.45; }
+  .sk .pr { list-style: none; padding: 0.7rem 0 0; margin-top: auto; border-top: 1px solid rgba(0,0,0,.07); font-size: 0.8rem; }
+  .sk .pr li { margin: 0 0 0.2rem; padding-left: 0.9rem; position: relative; }
+  .sk .pr li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.35rem; height: 0.35rem; border-radius: 50%; background: rgb(var(--tint)); }
   @media (max-width: 900px) { .sk { grid-template-columns: 1fr; } }
 
   /* ── Volets dépliables ───────────────────── */
   details > summary { list-style: none; cursor: pointer; }
   details > summary::-webkit-details-marker { display: none; }
-  .pm { flex: none; width: 1.6rem; height: 1.6rem; border: 1px solid var(--ink); border-radius: 50%; position: relative; transition: background .15s; }
-  .pm::before, .pm::after { content: ""; position: absolute; left: 50%; top: 50%; width: 0.6rem; height: 1px; background: var(--ink); transform: translate(-50%, -50%); transition: transform .2s; }
+  details::details-content { height: 0; overflow: clip; transition: height .45s var(--ease), content-visibility .45s allow-discrete; }
+  details[open]::details-content { height: auto; }
+  .pm { flex: none; width: 1.6rem; height: 1.6rem; border: 1px solid var(--ink); border-radius: 50%; position: relative; transition: background .2s; }
+  .pm::before, .pm::after { content: ""; position: absolute; left: 50%; top: 50%; width: 0.6rem; height: 1px; background: var(--ink); transform: translate(-50%, -50%); transition: transform .3s var(--ease), background .2s; }
   .pm::after { transform: translate(-50%, -50%) rotate(90deg); }
   details[open] > summary .pm::after { transform: translate(-50%, -50%) rotate(0deg); }
+  .pm { transition: background .2s, transform .45s var(--ease); }
+  details[open] > summary .pm { transform: rotate(180deg); background: var(--red); border-color: var(--red); }
+  details[open] > summary .pm::before, details[open] > summary .pm::after { background: #fff; }
+  details[open] > .inner, details[open] > .inner > * { animation: reveal .55s var(--ease) both; }
+  details[open] > .inner > *:nth-child(2) { animation-delay: .05s; }
+  details[open] > .inner > *:nth-child(3) { animation-delay: .1s; }
+  details[open] > .inner > *:nth-child(4) { animation-delay: .15s; }
+  details[open] > .inner > *:nth-child(n+5) { animation-delay: .2s; }
+  @keyframes reveal { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
   summary:hover .pm { background: var(--ink); }
   summary:hover .pm::before, summary:hover .pm::after { background: var(--bg); }
 
   /* Projets et expériences */
   .xp { border-top: 1px solid var(--ink); }
   .xp:last-of-type { border-bottom: 1px solid var(--ink); }
-  .xp > summary { display: grid; grid-template-columns: 12rem 1fr auto; gap: 1.5rem; align-items: start; padding: 1.5rem 0; }
-  .xp .pic img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .xp > summary { display: grid; grid-template-columns: 16rem 1fr auto; gap: 1.5rem; align-items: start; padding: 1.5rem 0.75rem; margin: 0 -0.75rem; border-radius: 16px; transition: background .35s; }
+  .xp > summary:hover { background: linear-gradient(90deg, rgba(var(--red-rgb), .045), rgba(var(--red-rgb), 0) 70%); }
+  .xp .pic { overflow: hidden; border-radius: 10px; }
+  .xp .pic img { display: block; width: 100%; height: auto; border-radius: 10px; transition: transform .8s var(--ease); }
+  .xp > summary:hover .pic img { transform: scale(1.03); }
   .xp .pic figcaption { font-size: 0.65rem; color: var(--mute); margin-top: 0.35rem; line-height: 1.35; }
   .xp .pic figcaption a { color: var(--mute); }
+  .xp .ph { aspect-ratio: 16 / 9; background: var(--soft); border-radius: 10px; display: flex; align-items: flex-end; padding: 0.7rem; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); }
   .xp .yr { font-size: 0.8rem; color: var(--mute); }
   .xp .org { display: block; font-size: clamp(1.3rem, 2.2vw, 1.7rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-top: 0.2rem; }
   .xp .t { display: block; font-size: 0.95rem; margin-top: 0.4rem; }
   .xp .m { display: block; font-size: 0.8rem; color: var(--mute); margin-top: 0.2rem; }
-  .xp .inner { padding: 0 0 2rem; margin-left: 13.5rem; font-size: 0.92rem; }
+  .xp .inner { padding: 0 0 2rem; margin-left: 17.5rem; font-size: 0.92rem; }
   .xp .inner > * + * { margin-top: 1.25rem; }
   .xp .inner .k { margin-bottom: 0.4rem; }
-  .fig { background: var(--soft); padding: 1rem; }
+  .fig { background: linear-gradient(180deg, #f6f6f4, #efefec); padding: 1rem; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.04); }
   .fig img { display: block; width: 100%; height: auto; max-height: 26rem; object-fit: contain; mix-blend-mode: multiply; }
   .fig figcaption { font-size: 0.75rem; color: var(--mute); margin-top: 0.6rem; }
-  .xp .ph { aspect-ratio: 4 / 3; background: var(--soft); display: flex; align-items: flex-end; padding: 0.6rem; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); }
   .figs2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 900px) { .xp > summary { grid-template-columns: 11rem 1fr auto; } .xp .inner { margin-left: 12.5rem; } }
   @media (max-width: 700px) { .xp > summary { grid-template-columns: 1fr auto; } .xp .pic { grid-column: 1 / -1; } .xp .inner { margin-left: 0; } .figs2 { grid-template-columns: 1fr; } }
 
-  /* ── Documents : volets PDF ──────────────── */
-  .doc { border-top: 1px solid var(--ink); }
-  .doc:last-of-type { border-bottom: 1px solid var(--ink); }
-  .doc > summary { display: grid; grid-template-columns: 2.5rem 1fr auto; gap: 1rem; align-items: center; padding: 1.1rem 0; }
-  .doc .ic { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; border: 1px solid var(--ink); padding: 0.25rem 0; text-align: center; }
-  .doc .t { font-weight: 700; display: block; }
-  .doc .m { display: block; font-size: 0.8rem; color: var(--mute); }
-  .pdf { background: var(--soft); padding: 1.25rem; max-height: 85vh; overflow-y: auto; }
-  .pdf canvas { display: block; width: 100%; height: auto; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-  .pdf canvas + canvas { margin-top: 1.25rem; }
-  .pdf .load { font-size: 0.8rem; color: var(--mute); }
-  .dl { display: inline-block; margin: 0.75rem 0 1.5rem; font-size: 0.8rem; }
+  /* Bouton « Lire le résumé » */
+  .read { display: grid; grid-template-columns: 2.5rem 1fr auto; gap: 1rem; align-items: center; width: 100%; text-align: left; background: linear-gradient(160deg, rgba(29,92,69,.04), #fff 50%); border: 1px solid rgba(0,0,0,.07); border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 18px -8px rgba(0,0,0,.1); padding: 0.85rem 1.1rem; cursor: pointer; transition: background .25s, border-color .25s, box-shadow .3s; }
+  .read .ic { font-size: 1.15rem; line-height: 1; color: var(--red); background: rgba(29,92,69,.08); border-radius: 10px; padding: 0.5rem 0; text-align: center; }
+  .read .t { display: block; font-weight: 700; font-size: 0.9rem; }
+  .read .m { display: block; font-size: 0.78rem; color: var(--mute); }
+  .read .go { font-size: 0.82rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; }
+  .read .go i { transition: transform .3s var(--ease); }
+  .read:hover .go i { transform: translateX(3px); }
+  .read:hover, .read[aria-expanded="true"] { background: var(--soft); border-color: #c4c4c4; box-shadow: 0 8px 24px rgba(0,0,0,.05); }
+
+  /* ── Lecteur PDF latéral : la page se décale, rien n'est masqué ── */
+  body { transition: padding-right .5s var(--ease); }
+  .drawer { position: fixed; top: 0.75rem; right: 0.75rem; bottom: 0.75rem; z-index: 50; width: calc(var(--dw) - 1.5rem); display: flex; flex-direction: column; background: rgba(255,255,255,.82); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); border: 1px solid var(--rule); border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.12); overflow: hidden; transform: translateX(calc(100% + 2rem)); transition: transform .5s var(--ease), visibility 0s .5s; visibility: hidden; }
+  html.reading .drawer { transform: none; visibility: visible; transition: transform .5s var(--ease), visibility 0s; }
+  @media (min-width: 1001px) { html.reading body { padding-right: var(--dw); } }
+  @media (max-width: 1000px) { .drawer { width: auto; left: 0.75rem; } }
+  .drawer header { display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem 1rem 0.8rem 1.25rem; border-bottom: 1px solid var(--rule); }
+  .drawer header .tt { flex: 1; min-width: 0; }
+  .drawer header .tt b { display: block; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer header .tt span { font-size: 0.72rem; color: var(--mute); }
+  .drawer header a, .drawer header button { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; background: rgba(255,255,255,.7); border: 1px solid var(--rule); border-radius: var(--rs); padding: 0.35rem 0.85rem; cursor: pointer; text-decoration: none; transition: background .2s, border-color .2s; white-space: nowrap; }
+  .drawer header a:hover, .drawer header button:hover { background: var(--soft); border-color: #c4c4c4; }
+  .drawer .pages { flex: 1; overflow-y: auto; background: rgba(243,243,241,.7); padding: 1.25rem; }
+  .drawer .pages canvas { display: block; width: 100%; height: auto; background: #fff; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,.08); opacity: 0; transform: translateY(8px); transition: opacity .5s, transform .5s var(--ease); }
+  .drawer .pages canvas.in { opacity: 1; transform: none; }
+  .drawer .pages canvas + canvas { margin-top: 1.25rem; }
+  .drawer .pages iframe { width: 100%; height: 100%; border: 0; border-radius: 6px; background: #fff; }
+  .drawer .pages .load { font-size: 0.8rem; color: var(--mute); }
+  @media (max-width: 700px) { .drawer .pages { padding: 0.6rem; } .drawer header .dl-txt { display: none; } }
 
   /* ── Listes ──────────────────────────────── */
   .rows { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--ink); }
   .rows li { display: grid; grid-template-columns: 1fr auto; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--rule); margin: 0; font-size: 0.92rem; }
   .rows li > :last-child { color: var(--mute); text-align: right; }
   .rows li a { color: var(--ink); }
+  .rows.contact li > span:first-child { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .rows.contact i { font-size: 1rem; width: 1.1rem; text-align: center; }
   .kv { display: grid; grid-template-columns: 9rem 1fr; gap: 0.8rem 1.5rem; font-size: 0.92rem; border-top: 1px solid var(--ink); padding-top: 1rem; margin: 0; }
   .kv dt { color: var(--mute); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding-top: 0.15rem; }
   .kv dd { margin: 0; }
   @media (max-width: 640px) { .kv { grid-template-columns: 1fr; gap: 0.2rem; } .kv dd { margin-bottom: 0.8rem; } }
 
-  .big { font-size: clamp(1.15rem, 2vw, 1.4rem); font-weight: 500; letter-spacing: 0; line-height: 1.1; word-break: break-word; text-decoration: none; display: inline-block; border-bottom: 1px solid var(--red); }
-  .big:hover { color: var(--red); }
+  /* ── Pied de page ────────────────────────── */
+  footer { margin-top: 7rem; background: #f5f5f7; border-top: 1px solid rgba(0,0,0,.06); font-size: 0.82rem; color: #424245; }
+  footer .cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: var(--gut); padding-top: 3rem; padding-bottom: 2.5rem; }
+  footer .brand b { display: block; font-size: 1rem; color: var(--ink); }
+  footer .brand p { margin-top: 0.35rem; color: var(--mute); max-width: 18rem; }
+  footer .k { color: var(--ink); font-weight: 600; letter-spacing: 0.06em; margin-bottom: 0.7rem; }
+  footer ul { list-style: none; padding: 0; }
+  footer li { margin: 0 0 0.45rem; }
+  footer a { text-decoration: none; color: #424245; transition: color .2s; display: inline-flex; align-items: center; gap: 0.45rem; }
+  footer a:hover { color: var(--ink); }
+  footer a i { font-size: 0.95rem; }
+  footer .lang { background: #fff; border-color: rgba(0,0,0,.12); }
+  footer .lang button { padding: 0.35rem 0.8rem; }
+  footer .lang button + button { border-left-color: rgba(0,0,0,.12); }
+  footer .base { border-top: 1px solid rgba(0,0,0,.08); padding-top: 1rem; padding-bottom: 1.5rem; color: var(--mute); font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  footer .up { display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: #fff; border: 1px solid rgba(0,0,0,.1); color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: transform .3s var(--ease), box-shadow .3s; }
+  footer .up:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
+  @media (max-width: 800px) { footer .cols { grid-template-columns: 1fr 1fr; } footer .brand { grid-column: 1 / -1; } }
 
-  footer { margin-top: 6rem; border-top: 1px solid var(--ink); }
-  footer .wrap { padding-top: 1rem; padding-bottom: 2rem; font-size: 0.72rem; color: var(--mute); }
-  footer .wrap p + p { margin-top: 0.5rem; }
-
-  @media print { nav { display: none; } }
+  @media print { nav, .read, footer, .drawer { display: none; } details::details-content { height: auto; } }
 </style>
 </head>
 <body>
 
 <!-- ═══ Page d'accueil ═══ -->
+<div class="hero-band" id="top">
 <header class="hero wrap">
   <div class="top">
     <span><span lang="fr">Portfolio de compétences</span><span lang="en">Skills portfolio</span></span>
-    <span class="mute">2026 — 2027</span>
+    <span>2026 — 2027</span>
   </div>
   <div class="mid">
+    <div class="photo"><img src="img/photo.jpg" alt="Albin Planeille" width="900" height="900"></div>
     <div>
       <h1>Albin Planeille</h1>
       <p class="role" lang="fr">Élève ingénieur, vision par ordinateur et robotique</p>
       <p class="role" lang="en">Engineering student, computer vision and robotics</p>
     </div>
-    <div class="photo"><img src="img/photo.jpg" alt="Albin Planeille" width="900" height="900"></div>
   </div>
-  <div class="bottom">
-    <div><span class="k" lang="fr">Formation</span><span class="k" lang="en">Education</span>
-      <span lang="fr">3e année, domaine Machines, Robots et Systèmes — SIGMA Clermont (INP Clermont Auvergne)</span>
-      <span lang="en">Third year, Machines, Robots and Systems — SIGMA Clermont (INP Clermont Auvergne)</span></div>
-    <div><span class="k" lang="fr">Double diplôme</span><span class="k" lang="en">Double degree</span>
-      <span lang="fr">M2 Perception artificielle et robotique — Université Clermont Auvergne, Institut Pascal</span>
-      <span lang="en">MSc Artificial Perception and Robotics — Université Clermont Auvergne, Institut Pascal</span></div>
-    <div><span class="k" lang="fr">À venir</span><span class="k" lang="en">Upcoming</span>
-      <span lang="fr">Projet de master au LASTRO (EPFL), co-encadré à l’ETH Zurich, à partir de mars 2027</span>
-      <span lang="en">Master project at LASTRO (EPFL), co-supervised at ETH Zurich, from March 2027</span></div>
+  <div class="tiles">
+    <div class="tile"><span class="k"><i class="bi bi-mortarboard"></i><span lang="fr">Formation</span><span lang="en">Education</span></span>
+      <span lang="fr">3e année, domaine <abbr tabindex="0" data-t="Machines, Robots et Systèmes">MRS</abbr>, parcours <abbr tabindex="0" data-t="Systèmes mécatroniques et robotiques">SMR</abbr> — SIGMA Clermont (INP Clermont Auvergne)</span>
+      <span lang="en">Third year, <abbr tabindex="0" data-t="Machines, Robots and Systems">MRS</abbr> programme, <abbr tabindex="0" data-t="Mechatronic and Robotic Systems">SMR</abbr> track — SIGMA Clermont (INP Clermont Auvergne)</span></div>
+    <div class="tile"><span class="k"><i class="bi bi-diagram-3"></i><span lang="fr">Double diplôme</span><span lang="en">Double degree</span></span>
+      <span lang="fr">M2 <abbr tabindex="0" data-t="Perception artificielle et robotique">PAR</abbr> — Université Clermont Auvergne, Institut Pascal</span>
+      <span lang="en">MSc <abbr tabindex="0" data-t="Artificial Perception and Robotics">PAR</abbr> — Université Clermont Auvergne, Institut Pascal</span></div>
+    <div class="tile"><span class="k"><i class="bi bi-calendar-event"></i><span lang="fr">À venir</span><span lang="en">Upcoming</span></span>
+      <span lang="fr">Projet de master au <abbr tabindex="0" data-t="Laboratoire d’astrophysique de l’EPFL">LASTRO</abbr> (EPFL), en collaboration avec l’ETH Zurich, à partir de mars 2027</span>
+      <span lang="en">Master project at <abbr tabindex="0" data-t="EPFL Laboratory of Astrophysics">LASTRO</abbr> (EPFL), in collaboration with ETH Zurich, from March 2027</span></div>
   </div>
 </header>
+</div>
 
 <nav aria-label="Sommaire">
+  <div class="progress" aria-hidden="true"></div>
   <div class="wrap">
     <div class="links">
       <a href="#presentation"><b>01</b><span lang="fr">Présentation</span><span lang="en">Profile</span></a>
@@ -203,14 +293,14 @@
     <div class="body">
       <p class="lead" lang="fr">Élève ingénieur en dernière année, en double diplôme avec un master orienté recherche en perception artificielle et robotique.</p>
       <p class="lead" lang="en">Final-year engineering student, in a double degree with a research-oriented MSc in artificial perception and robotics.</p>
-      <p lang="fr">Je suis en 3e année à SIGMA Clermont (INP Clermont Auvergne), dans le domaine Machines, Robots et Systèmes, parcours SMR, et en M2 Perception artificielle et robotique à l’Université Clermont Auvergne, adossé à l’Institut Pascal. J’ai suivi auparavant les classes préparatoires PCSI puis PSI au lycée La Martinière Monplaisir, à Lyon.</p>
-      <p lang="en">I am a third-year student at SIGMA Clermont (INP Clermont Auvergne), in the Machines, Robots and Systems programme, SMR track, and in the MSc Artificial Perception and Robotics at Université Clermont Auvergne, attached to Institut Pascal. Before that, I attended the PCSI then PSI preparatory classes at Lycée La Martinière Monplaisir, in Lyon.</p>
+      <p lang="fr">Je suis en 3e année à SIGMA Clermont (INP Clermont Auvergne), dans le domaine <abbr tabindex="0" data-t="Machines, Robots et Systèmes">MRS</abbr>, parcours <abbr tabindex="0" data-t="Systèmes mécatroniques et robotiques">SMR</abbr>, et en M2 <abbr tabindex="0" data-t="Perception artificielle et robotique">PAR</abbr> à l’Université Clermont Auvergne, adossé à l’Institut Pascal. J’ai suivi auparavant les classes préparatoires PCSI puis PSI au lycée La Martinière Monplaisir, à Lyon.</p>
+      <p lang="en">I am a third-year student at SIGMA Clermont (INP Clermont Auvergne), in the <abbr tabindex="0" data-t="Machines, Robots and Systems">MRS</abbr> programme, <abbr tabindex="0" data-t="Mechatronic and Robotic Systems">SMR</abbr> track, and in the MSc <abbr tabindex="0" data-t="Artificial Perception and Robotics">PAR</abbr> at Université Clermont Auvergne, attached to Institut Pascal. Before that, I attended the PCSI then PSI preparatory classes at Lycée La Martinière Monplaisir, in Lyon.</p>
       <p lang="fr">Avant une année de césure, j’ai effectué un stage de recherche au CEA, en statistique et calcul scientifique. Pendant la césure, j’ai travaillé chez CLAAS en calcul de structures, puis à l’ONERA en vision par ordinateur et géométrie multivue. À l’école, j’ai été chef d’équipe du groupe Sigmatronik au Dassault UAV Challenge.</p>
       <p lang="en">Before a gap year, I completed a research internship at CEA in statistics and scientific computing. During the gap year, I worked at CLAAS in structural analysis, then at ONERA in computer vision and multi-view geometry. At school, I led the Sigmatronik team in the Dassault UAV Challenge.</p>
       <p lang="fr">Je m’intéresse aux mathématiques et à la géométrie appliquées à la vision par ordinateur et à la robotique : groupes de Lie, SE(3), quaternions, estimation d’état, stéréovision, SLAM et filtrage probabiliste. Je préfère le versant géométrique et mathématique au deep learning générique.</p>
       <p lang="en">I am interested in mathematics and geometry applied to computer vision and robotics: Lie groups, SE(3), quaternions, state estimation, stereovision, SLAM and probabilistic filtering. I prefer the geometric and mathematical side to generic deep learning.</p>
-      <p lang="fr">De mars à septembre 2027, je réaliserai mon projet de master au LASTRO à l’EPFL, avec un co-encadrement de Konrad Schindler à l’ETH Zurich, sur la détection et le suivi de mini-drones. Je souhaite ensuite poursuivre en thèse à la rentrée 2027.</p>
-      <p lang="en">From March to September 2027, I will carry out my master project at LASTRO, EPFL, co-supervised by Konrad Schindler at ETH Zurich, on the detection and tracking of mini-drones. I then intend to start a PhD in autumn 2027.</p>
+      <p lang="fr">De mars à septembre 2027, je réaliserai mon projet de master au <abbr tabindex="0" data-t="Laboratoire d’astrophysique de l’EPFL">LASTRO</abbr> à l’EPFL, en collaboration avec l’ETH Zurich, sur la détection et le suivi de mini-drones. Je souhaite ensuite poursuivre en thèse à la rentrée 2027.</p>
+      <p lang="en">From March to September 2027, I will carry out my master project at <abbr tabindex="0" data-t="EPFL Laboratory of Astrophysics">LASTRO</abbr>, EPFL, in collaboration with ETH Zurich, on the detection and tracking of mini-drones. I then intend to start a PhD in autumn 2027.</p>
     </div>
   </section>
 
@@ -221,52 +311,51 @@
     <div class="body">
       <p class="label" lang="fr">Techniques</p><p class="label" lang="en">Technical</p>
       <div class="sk">
-        <div><span class="c">T1</span>
-          <span class="t" lang="fr">Vision par ordinateur et géométrie multivue</span>
-          <span class="t" lang="en">Computer vision and multi-view geometry</span>
-          <span class="d" lang="fr">Modèles et calibration de caméras, stéréovision, segmentation d’images par apprentissage profond.</span>
-          <span class="d" lang="en">Camera models and calibration, stereovision, deep-learning image segmentation.</span>
-          <span class="p" lang="fr">Stage ONERA ; master Perception artificielle et robotique</span>
-          <span class="p" lang="en">ONERA internship; MSc Artificial Perception and Robotics</span></div>
-        <div><span class="c">T2</span>
-          <span class="t" lang="fr">Conception et simulation mécanique</span>
-          <span class="t" lang="en">Mechanical design and simulation</span>
-          <span class="d" lang="fr">Calcul de structures par éléments finis, fatigue, dimensionnement, CAO.</span>
-          <span class="d" lang="en">Finite element structural analysis, fatigue, sizing, CAD.</span>
-          <span class="p" lang="fr">Stage CLAAS ; Dassault UAV Challenge</span>
-          <span class="p" lang="en">CLAAS internship; Dassault UAV Challenge</span></div>
-        <div><span class="c">T3</span>
-          <span class="t" lang="fr">Statistique et calcul scientifique</span>
-          <span class="t" lang="en">Statistics and scientific computing</span>
-          <span class="d" lang="fr">Statistique inférentielle, optimisation numérique, développement en Python et C++.</span>
-          <span class="d" lang="en">Inferential statistics, numerical optimisation, development in Python and C++.</span>
-          <span class="p" lang="fr">Stage CEA</span>
-          <span class="p" lang="en">CEA internship</span></div>
+        <div class="card"><span class="c">T1</span>
+          <h3 lang="fr">Vision par ordinateur et géométrie multivue</h3><h3 lang="en">Computer vision and multi-view geometry</h3>
+          <p class="d" lang="fr">Modèles et calibration de caméras, stéréovision, géométrie dans SE(3), segmentation d’images par apprentissage profond.</p><p class="d" lang="en">Camera models and calibration, stereovision, geometry in SE(3), deep-learning image segmentation.</p>
+          <ul class="pr">
+            <li><span lang="fr">Stage ONERA</span><span lang="en">ONERA internship</span></li>
+            <li><span lang="fr">M2 PAR</span><span lang="en">MSc PAR</span></li>
+          </ul></div>
+        <div class="card"><span class="c">T2</span>
+          <h3 lang="fr">Conception et simulation mécanique</h3><h3 lang="en">Mechanical design and simulation</h3>
+          <p class="d" lang="fr">Calcul de structures par éléments finis, fatigue, dimensionnement, CAO, ingénierie système.</p><p class="d" lang="en">Finite element structural analysis, fatigue, sizing, CAD, systems engineering.</p>
+          <ul class="pr">
+            <li><span lang="fr">Stage CLAAS</span><span lang="en">CLAAS internship</span></li>
+            <li><span lang="fr">Dassault UAV Challenge</span><span lang="en">Dassault UAV Challenge</span></li>
+          </ul></div>
+        <div class="card"><span class="c">T3</span>
+          <h3 lang="fr">Statistique et calcul scientifique</h3><h3 lang="en">Statistics and scientific computing</h3>
+          <p class="d" lang="fr">Statistique inférentielle, optimisation numérique, développement en Python et C++.</p><p class="d" lang="en">Inferential statistics, numerical optimisation, development in Python and C++.</p>
+          <ul class="pr">
+            <li><span lang="fr">Stage CEA</span><span lang="en">CEA internship</span></li>
+          </ul></div>
       </div>
 
       <p class="label" lang="fr">Humaines et organisationnelles</p><p class="label" lang="en">Interpersonal and organisational</p>
-      <div class="sk">
-        <div><span class="c">S1</span>
-          <span class="t" lang="fr">Communication scientifique et technique</span>
-          <span class="t" lang="en">Scientific and technical communication</span>
-          <span class="d" lang="fr">Rédaction de rapports et de synthèses, en français et en anglais.</span>
-          <span class="d" lang="en">Writing reports and summaries, in French and English.</span>
-          <span class="p" lang="fr">Fiches de synthèse des stages et du projet ; anglais C1</span>
-          <span class="p" lang="en">Summaries of the internships and the project; English C1</span></div>
-        <div><span class="c">S2</span>
-          <span class="t" lang="fr">Travail en équipe pluridisciplinaire</span>
-          <span class="t" lang="en">Working in multidisciplinary teams</span>
-          <span class="d" lang="fr">Projet mené en équipe ; échanges avec la conception et les essais.</span>
-          <span class="d" lang="en">Team project; working with design and testing.</span>
-          <span class="p" lang="fr">Dassault UAV Challenge ; stage CLAAS</span>
-          <span class="p" lang="en">Dassault UAV Challenge; CLAAS internship</span></div>
-        <div><span class="c">S3</span>
-          <span class="t" lang="fr">Prise en compte des enjeux environnementaux et de sûreté</span>
-          <span class="t" lang="en">Environmental and safety awareness</span>
-          <span class="d" lang="fr">Impact climatique de l’aviation, sûreté nucléaire.</span>
-          <span class="d" lang="en">Climate impact of aviation, nuclear safety.</span>
-          <span class="p" lang="fr">Stages ONERA et CEA</span>
-          <span class="p" lang="en">ONERA and CEA internships</span></div>
+      <div class="sk soft">
+        <div class="card"><span class="c">S1</span>
+          <h3 lang="fr">Communication scientifique et technique</h3><h3 lang="en">Scientific and technical communication</h3>
+          <p class="d" lang="fr">Rédaction de rapports et de résumés, en français et en anglais.</p><p class="d" lang="en">Writing reports and summaries, in French and English.</p>
+          <ul class="pr">
+            <li><span lang="fr">Résumés des stages et du projet</span><span lang="en">Summaries of the internships and the project</span></li>
+            <li><span lang="fr">Anglais C1</span><span lang="en">English C1</span></li>
+          </ul></div>
+        <div class="card"><span class="c">S2</span>
+          <h3 lang="fr">Travail en équipe pluridisciplinaire</h3><h3 lang="en">Working in multidisciplinary teams</h3>
+          <p class="d" lang="fr">Conduite d’une équipe projet ; échanges avec la conception et les essais.</p><p class="d" lang="en">Leading a project team; working with design and testing.</p>
+          <ul class="pr">
+            <li><span lang="fr">Dassault UAV Challenge, chef d’équipe</span><span lang="en">Dassault UAV Challenge, team leader</span></li>
+            <li><span lang="fr">Stage CLAAS</span><span lang="en">CLAAS internship</span></li>
+          </ul></div>
+        <div class="card"><span class="c">S3</span>
+          <h3 lang="fr">Prise en compte des enjeux environnementaux et de sûreté</h3><h3 lang="en">Environmental and safety awareness</h3>
+          <p class="d" lang="fr">Impact climatique de l’aviation, sûreté nucléaire.</p><p class="d" lang="en">Climate impact of aviation, nuclear safety.</p>
+          <ul class="pr">
+            <li><span lang="fr">Stage ONERA</span><span lang="en">ONERA internship</span></li>
+            <li><span lang="fr">Stage CEA</span><span lang="en">CEA internship</span></li>
+          </ul></div>
       </div>
     </div>
   </section>
@@ -276,7 +365,7 @@
     <div class="head"><div class="num">03</div>
       <h2 lang="fr">Projets</h2><h2 lang="en">Projects</h2></div>
     <div class="body">
-      <details class="xp">
+      <details class="xp" id="pj-duc">
         <summary>
           <figure class="pic"><img src="img/duc/catia.jpg" alt="" loading="lazy"></figure>
           <span>
@@ -327,13 +416,11 @@
             <p lang="fr">Pour une première participation, le principal risque était d’omettre un élément critique. Le projet a donc privilégié une ingénierie système approfondie et des solutions éprouvées, afin de dégager du temps pour l’innovation. À la remise du dossier, le drone n’était pas encore assemblé. L’enseignement transmis aux équipes suivantes est de garantir d’abord les exigences obligatoires avant les exigences facultatives.</p>
             <p lang="en">For a first participation, the main risk was overlooking a critical element. The project therefore favoured thorough systems engineering and proven solutions, to free up time for innovation. When the file was submitted, the drone was not yet assembled. The lesson passed on to the following teams is to secure the mandatory requirements first, before the optional ones.</p>
           </div>
-          <details class="doc" data-pdf="resumes/duc.pdf">
-            <summary><span class="ic">PDF</span>
-              <span><span class="t" lang="fr">Fiche de synthèse</span><span class="t" lang="en">Summary report (in French)</span><span class="m">Conception d’un drone quadricoptère de largage à camouflage optique dynamique</span></span>
-              <span class="pm"></span></summary>
-            <div class="pdf"><p class="load">…</p></div>
-            <a class="dl" href="resumes/duc.pdf" download><span lang="fr">Télécharger ↓</span><span lang="en">Download ↓</span></a>
-          </details>
+          <button type="button" class="read" data-pdf="resumes/duc.pdf" data-pdf-en="resumes/en/duc.pdf" data-title="Conception d’un drone quadricoptère de largage à camouflage optique dynamique" data-title-en="Design of a Payload-Dropping Quadcopter with Dynamic Optical Camouflage">
+            <span class="ic"><i class="bi bi-file-earmark-pdf"></i></span>
+            <span><span class="t" lang="fr">Résumé</span><span class="t" lang="en">Summary</span><span class="m" lang="fr">Conception d’un drone quadricoptère de largage à camouflage optique dynamique</span><span class="m" lang="en">Design of a Payload-Dropping Quadcopter with Dynamic Optical Camouflage</span></span>
+            <span class="go"><span lang="fr">Lire</span><span lang="en">Read</span> <i class="bi bi-arrow-right"></i></span>
+          </button>
         </div>
       </details>
     </div>
@@ -346,7 +433,7 @@
     <div class="body">
       <p class="label" lang="fr">Recherche</p><p class="label" lang="en">Research</p>
 
-      <details class="xp">
+      <details class="xp" id="xp-epfl">
         <summary>
           <figure class="pic"><div class="ph"><span lang="fr">À venir</span><span lang="en">Upcoming</span></div></figure>
           <span>
@@ -354,8 +441,8 @@
             <span class="org">EPFL · ETH Zurich</span>
             <span class="t" lang="fr">Projet de master (à venir) — détection et suivi de mini-drones</span>
             <span class="t" lang="en">Master project (upcoming) — detection and tracking of mini-drones</span>
-            <span class="m" lang="fr">LASTRO, EPFL, Lausanne ; co-encadrement : Konrad Schindler, groupe de photogrammétrie et télédétection, Institute of Geodesy and Photogrammetry, ETH Zurich</span>
-            <span class="m" lang="en">LASTRO, EPFL, Lausanne; co-supervision: Konrad Schindler, Photogrammetry and Remote Sensing group, Institute of Geodesy and Photogrammetry, ETH Zurich</span>
+            <span class="m" lang="fr"><abbr tabindex="0" data-t="Laboratoire d’astrophysique de l’EPFL">LASTRO</abbr>, EPFL, Lausanne</span>
+            <span class="m" lang="en"><abbr tabindex="0" data-t="EPFL Laboratory of Astrophysics">LASTRO</abbr>, EPFL, Lausanne</span>
           </span>
           <span class="pm"></span>
         </summary>
@@ -368,7 +455,7 @@
             <li>Intégration d’une caméra pan-tilt-zoom (PTZ) pilotée automatiquement vers la position prédite du drone.</li>
             <li>Gestion de la latence entre logiciel de vision et commande matérielle.</li>
             <li>Essais terrain.</li>
-            <li>Évaluation de la précision du suivi, de la prédiction et du pointage par rapport à une vérité terrain RTK de précision centimétrique.</li>
+            <li>Évaluation de la précision du suivi, de la prédiction et du pointage par rapport à une vérité terrain <abbr tabindex="0" data-t="Real Time Kinematic, positionnement GNSS centimétrique">RTK</abbr> de précision centimétrique.</li>
           </ul>
           <ul lang="en">
             <li>Running the pipeline in near real time.</li>
@@ -376,12 +463,13 @@
             <li>Integration of a pan-tilt-zoom (PTZ) camera automatically steered towards the predicted drone position.</li>
             <li>Handling latency between vision software and hardware control.</li>
             <li>Field tests.</li>
-            <li>Evaluation of tracking, prediction and pointing accuracy against centimetre-level RTK ground truth.</li>
+            <li>Evaluation of tracking, prediction and pointing accuracy against centimetre-level <abbr tabindex="0" data-t="Real Time Kinematic, centimetre-level GNSS positioning">RTK</abbr> ground truth.</li>
           </ul>
-          <p class="mute"><span lang="fr">Compétences mobilisées : calibration, triangulation, filtrage de Kalman, commande en boucle fermée, temps réel. Projet de master EPFL de six mois (30 ECTS), sous la direction de Jean-Paul Kneib (LASTRO) ; gestion du projet : Berry Holl (EPFL).</span><span lang="en">Skills involved: calibration, triangulation, Kalman filtering, closed-loop control, real time. Six-month EPFL master project (30 ECTS), directed by Jean-Paul Kneib (LASTRO); project management: Berry Holl (EPFL).</span></p>
+          <p class="mute"><span lang="fr">Compétences mobilisées : calibration, triangulation, filtrage de Kalman, commande en boucle fermée, temps réel. Projet de master EPFL de six mois (30 ECTS).</span><span lang="en">Skills involved: calibration, triangulation, Kalman filtering, closed-loop control, real time. Six-month EPFL master project (30 ECTS).</span></p>
         </div>
       </details>
-      <details class="xp">
+
+      <details class="xp" id="xp-onera">
         <summary>
           <figure class="pic">
             <img src="img/onera_site.jpg" alt="ONERA, centre de Toulouse" loading="lazy">
@@ -389,11 +477,11 @@
           </figure>
           <span>
             <span class="yr" lang="fr">février – juillet 2026</span><span class="yr" lang="en">February – July 2026</span>
-            <span class="org">ONERA</span>
+            <span class="org">ONERA Toulouse</span>
             <span class="t" lang="fr">Stage de recherche — vision par ordinateur et géométrie multivue</span>
             <span class="t" lang="en">Research internship — computer vision and multi-view geometry</span>
-            <span class="m" lang="fr">Département Traitement de l’information et systèmes (DTIS), Toulouse</span>
-            <span class="m" lang="en">Information Processing and Systems Department (DTIS), Toulouse</span>
+            <span class="m" lang="fr"><abbr tabindex="0" data-t="Département Traitement de l’information et systèmes">DTIS</abbr>, Toulouse</span>
+            <span class="m" lang="en"><abbr tabindex="0" data-t="Information Processing and Systems Department">DTIS</abbr>, Toulouse</span>
           </span>
           <span class="pm"></span>
         </summary>
@@ -401,36 +489,34 @@
           <ul lang="fr">
             <li>Estimation de l’altitude des traînées de condensation par stéréovision à longue base, à partir de deux caméras hémisphériques au sol (OMEA 3C à Toulouse, OMEA 5C au Fauga) distantes d’environ 25,7 km.</li>
             <li>Reprojection de chaque image fisheye en vue gnomonique de focale fixe, équivalente à un modèle sténopé de matrice intrinsèque <i>K</i> inversible.</li>
-            <li>Poses des deux caméras dans SE(3), exprimées dans un repère ENU commun via l’ECEF, avec prise en compte de la courbure terrestre ; correction de l’inclinaison par une rotation de Rodrigues appliquée comme homographie.</li>
+            <li>Poses des deux caméras dans SE(3), exprimées dans un repère <abbr tabindex="0" data-t="East-North-Up, repère local tangent">ENU</abbr> commun via l’<abbr tabindex="0" data-t="Earth-Centered, Earth-Fixed, repère géocentrique">ECEF</abbr>, avec prise en compte de la courbure terrestre ; correction de l’inclinaison par une rotation de Rodrigues appliquée comme homographie.</li>
             <li>Altitude estimée par recherche de zéro de Brent, en maximisant le recouvrement (IoU) des masques de segmentation reprojetés à l’altitude testée.</li>
-            <li>Association de chaque traînée à l’avion qui l’a produite par corrélation avec les trajectoires ADS-B, ramenées au référentiel orthométrique des caméras par correction de l’ondulation du géoïde ; advection des traînées par le vent estimée à partir des champs du modèle AROME.</li>
+            <li>Association de chaque traînée à l’avion qui l’a produite par corrélation avec les trajectoires <abbr tabindex="0" data-t="Automatic Dependent Surveillance–Broadcast, positions diffusées par les avions">ADS-B</abbr>, ramenées au référentiel orthométrique des caméras par correction de l’ondulation du géoïde ; advection des traînées par le vent estimée à partir des champs du modèle AROME.</li>
             <li>Segmentation des traînées par le modèle U-Net (encodeur EfficientNet-B7) et, en segmentation d’instances, par le modèle Mask2Former (Swin-Small), entraînés en cascade : pré-entraînement sur GVCCS, puis affinage sur les jeux IPSL et ONERA.</li>
             <li>Refonte du code (<code>contrails_stereo</code>) autour d’une configuration unique OmegaConf, d’un lanceur SLURM avec chaînage des tâches et d’une interface d’inférence commune aux deux architectures.</li>
           </ul>
           <ul lang="en">
             <li>Contrail altitude estimation by long-baseline stereovision, from two ground-based hemispherical cameras (OMEA 3C in Toulouse, OMEA 5C at Le Fauga) about 25.7 km apart.</li>
             <li>Reprojection of each fisheye image into a fixed-focal gnomonic view, equivalent to a pinhole model with an invertible intrinsic matrix <i>K</i>.</li>
-            <li>Poses of both cameras in SE(3), expressed in a common ENU frame through ECEF, accounting for Earth curvature; tilt correction by a Rodrigues rotation applied as a homography.</li>
+            <li>Poses of both cameras in SE(3), expressed in a common <abbr tabindex="0" data-t="East-North-Up, local tangent frame">ENU</abbr> frame through <abbr tabindex="0" data-t="Earth-Centered, Earth-Fixed frame">ECEF</abbr>, accounting for Earth curvature; tilt correction by a Rodrigues rotation applied as a homography.</li>
             <li>Altitude estimated by Brent zero-search, maximising the overlap (IoU) of the segmentation masks reprojected at the tested altitude.</li>
-            <li>Association of each contrail with the aircraft that produced it by correlation with ADS-B tracks, brought to the cameras’ orthometric reference by geoid undulation correction; contrail advection by wind estimated from AROME model fields.</li>
+            <li>Association of each contrail with the aircraft that produced it by correlation with <abbr tabindex="0" data-t="Automatic Dependent Surveillance–Broadcast">ADS-B</abbr> tracks, brought to the cameras’ orthometric reference by geoid undulation correction; contrail advection by wind estimated from AROME model fields.</li>
             <li>Contrail segmentation with the U-Net model (EfficientNet-B7 encoder) and, for instance segmentation, the Mask2Former model (Swin-Small), trained in cascade: pre-training on GVCCS, then fine-tuning on the IPSL and ONERA datasets.</li>
             <li>Code refactoring (<code>contrails_stereo</code>) around a single OmegaConf configuration, a SLURM launcher with job chaining and an inference interface shared by both architectures.</li>
           </ul>
-          <p class="mute"><span lang="fr">Encadrement : Judicaël Bedouet ; co-encadrement : Claire Sarrat (physique de l’atmosphère, DTIS). Travail inscrit dans plusieurs projets de l’ONERA sur l’impact climatique de l’aviation, dont ClimAviation. Un article de journal intégrant ce travail est en préparation, coécrit avec un doctorant de l’ONERA.</span><span lang="en">Supervisor: Judicaël Bedouet; co-supervisor: Claire Sarrat (atmospheric physics, DTIS). Work carried out within several ONERA projects on the climate impact of aviation, including ClimAviation. A journal article including this work is in preparation, co-written with an ONERA PhD student.</span></p>
+          <p class="mute"><span lang="fr">Travail inscrit dans plusieurs projets de l’ONERA sur l’impact climatique de l’aviation, dont ClimAviation. Un article de journal intégrant ce travail est en préparation, coécrit avec un doctorant de l’ONERA.</span><span lang="en">Work carried out within several ONERA projects on the climate impact of aviation, including ClimAviation. A journal article including this work is in preparation, co-written with an ONERA PhD student.</span></p>
           <figure class="fig"><img src="img/onera/base.png" alt="" loading="lazy">
             <figcaption lang="fr">Géométrie du calcul d’altitude entre les deux stations, échelles verticales exagérées.</figcaption>
             <figcaption lang="en">Altitude computation geometry between the two stations, vertical scales exaggerated.</figcaption></figure>
-          <details class="doc" data-pdf="resumes/onera.pdf">
-            <summary><span class="ic">PDF</span>
-              <span><span class="t" lang="fr">Fiche de synthèse</span><span class="t" lang="en">Summary report (in French)</span><span class="m">Détection de traînées de condensation et estimation d’altitude par stéréovision à longue base</span></span>
-              <span class="pm"></span></summary>
-            <div class="pdf"><p class="load">…</p></div>
-            <a class="dl" href="resumes/onera.pdf" download><span lang="fr">Télécharger ↓</span><span lang="en">Download ↓</span></a>
-          </details>
+          <button type="button" class="read" data-pdf="resumes/onera.pdf" data-pdf-en="resumes/en/onera.pdf" data-title="Détection de traînées de condensation et estimation d’altitude par stéréovision à longue base" data-title-en="Contrail Detection and Altitude Estimation by Long-Baseline Stereovision">
+            <span class="ic"><i class="bi bi-file-earmark-pdf"></i></span>
+            <span><span class="t" lang="fr">Résumé</span><span class="t" lang="en">Summary</span><span class="m" lang="fr">Détection de traînées de condensation et estimation d’altitude par stéréovision à longue base</span><span class="m" lang="en">Contrail Detection and Altitude Estimation by Long-Baseline Stereovision</span></span>
+            <span class="go"><span lang="fr">Lire</span><span lang="en">Read</span> <i class="bi bi-arrow-right"></i></span>
+          </button>
         </div>
       </details>
 
-      <details class="xp">
+      <details class="xp" id="xp-cea">
         <summary>
           <figure class="pic">
             <img src="img/cea_site.jpg" alt="CEA Paris-Saclay" loading="lazy">
@@ -441,8 +527,8 @@
             <span class="org">CEA Paris-Saclay</span>
             <span class="t" lang="fr">Stage de recherche — statistiques et calcul scientifique</span>
             <span class="t" lang="en">Research internship — statistics and scientific computing</span>
-            <span class="m" lang="fr">Direction des Énergies (DES), DM2S/SGLS/LIAD, Laboratoire d’intelligence artificielle et de science des données — Gif-sur-Yvette</span>
-            <span class="m" lang="en">Energy Division (DES), DM2S/SGLS/LIAD, Artificial Intelligence and Data Science Laboratory — Gif-sur-Yvette</span>
+            <span class="m" lang="fr"><abbr tabindex="0" data-t="Direction des Énergies">DES</abbr>, <abbr tabindex="0" data-t="Laboratoire d’intelligence artificielle et de science des données">LIAD</abbr> — Gif-sur-Yvette</span>
+            <span class="m" lang="en"><abbr tabindex="0" data-t="Energy Division">DES</abbr>, <abbr tabindex="0" data-t="Artificial Intelligence and Data Science Laboratory">LIAD</abbr> — Gif-sur-Yvette</span>
           </span>
           <span class="pm"></span>
         </summary>
@@ -459,23 +545,20 @@
             <li>Study of the numerical optimisation methods and of the inferential statistics underlying distribution fitting.</li>
             <li>Direct C++ implementation in Uranie of <code>fit()</code> methods equivalent to SciPy’s, with a prototype relying on ROOT and Minuit2 for optimisation.</li>
           </ul>
-          <p class="mute"><span lang="fr">Encadrement : Gabriel Sarazin, ingénieur de recherche.</span><span lang="en">Supervisor: Gabriel Sarazin, research engineer.</span></p>
           <figure class="fig"><img src="img/cea.svg" alt="" loading="lazy">
             <figcaption lang="fr">Démarche de propagation des incertitudes.</figcaption>
             <figcaption lang="en">Uncertainty propagation workflow.</figcaption></figure>
-          <details class="doc" data-pdf="resumes/cea.pdf">
-            <summary><span class="ic">PDF</span>
-              <span><span class="t" lang="fr">Fiche de synthèse</span><span class="t" lang="en">Summary report (in French)</span><span class="m">Estimation paramétrique de lois de probabilité dans la plateforme Uranie</span></span>
-              <span class="pm"></span></summary>
-            <div class="pdf"><p class="load">…</p></div>
-            <a class="dl" href="resumes/cea.pdf" download><span lang="fr">Télécharger ↓</span><span lang="en">Download ↓</span></a>
-          </details>
+          <button type="button" class="read" data-pdf="resumes/cea.pdf" data-pdf-en="resumes/en/cea.pdf" data-title="Estimation paramétrique de lois de probabilité dans la plateforme Uranie" data-title-en="Parametric Estimation of Probability Distributions in the Uranie Platform">
+            <span class="ic"><i class="bi bi-file-earmark-pdf"></i></span>
+            <span><span class="t" lang="fr">Résumé</span><span class="t" lang="en">Summary</span><span class="m" lang="fr">Estimation paramétrique de lois de probabilité dans la plateforme Uranie</span><span class="m" lang="en">Parametric Estimation of Probability Distributions in the Uranie Platform</span></span>
+            <span class="go"><span lang="fr">Lire</span><span lang="en">Read</span> <i class="bi bi-arrow-right"></i></span>
+          </button>
         </div>
       </details>
 
       <p class="label" lang="fr">Entreprise</p><p class="label" lang="en">Industry</p>
 
-      <details class="xp">
+      <details class="xp" id="xp-claas">
         <summary>
           <figure class="pic">
             <img src="img/claas_site.jpg" alt="Presse à balles CLAAS Quadrant 5300 FC" loading="lazy">
@@ -511,13 +594,11 @@
           <figure class="fig"><img src="img/claas/weld.png" alt="" loading="lazy">
             <figcaption lang="fr">Modèle éléments finis d’un assemblage soudé.</figcaption>
             <figcaption lang="en">Finite element model of a welded assembly.</figcaption></figure>
-          <details class="doc" data-pdf="resumes/claas.pdf">
-            <summary><span class="ic">PDF</span>
-              <span><span class="t" lang="fr">Fiche de synthèse</span><span class="t" lang="en">Summary report (in French)</span><span class="m">Analyse par éléments finis appliquée à la validation structurelle de presses à balles</span></span>
-              <span class="pm"></span></summary>
-            <div class="pdf"><p class="load">…</p></div>
-            <a class="dl" href="resumes/claas.pdf" download><span lang="fr">Télécharger ↓</span><span lang="en">Download ↓</span></a>
-          </details>
+          <button type="button" class="read" data-pdf="resumes/claas.pdf" data-pdf-en="resumes/en/claas.pdf" data-title="Analyse par éléments finis appliquée à la validation structurelle de presses à balles" data-title-en="Finite Element Analysis Applied to the Structural Validation of Balers">
+            <span class="ic"><i class="bi bi-file-earmark-pdf"></i></span>
+            <span><span class="t" lang="fr">Résumé</span><span class="t" lang="en">Summary</span><span class="m" lang="fr">Analyse par éléments finis appliquée à la validation structurelle de presses à balles</span><span class="m" lang="en">Finite Element Analysis Applied to the Structural Validation of Balers</span></span>
+            <span class="go"><span lang="fr">Lire</span><span lang="en">Read</span> <i class="bi bi-arrow-right"></i></span>
+          </button>
         </div>
       </details>
     </div>
@@ -528,7 +609,7 @@
     <div class="head"><div class="num">05</div>
       <h2 lang="fr">Compétences complémentaires</h2><h2 lang="en">Additional skills</h2></div>
     <div class="body">
-      <dl class="kv">
+      <dl class="kv" id="langues">
         <dt><span lang="fr">Langues</span><span lang="en">Languages</span></dt>
         <dd><span lang="fr">Français (langue maternelle), anglais C1</span><span lang="en">French (native), English C1</span></dd>
         <dt><span lang="fr">Programmation</span><span lang="en">Programming</span></dt>
@@ -540,10 +621,10 @@
         <dt><span lang="fr">Environnement</span><span lang="en">Environment</span></dt>
         <dd>Linux, Git, SLURM, OmegaConf</dd>
       </dl>
-      <p class="label" lang="fr">Formation</p><p class="label" lang="en">Education</p>
+      <p class="label" id="formation" lang="fr">Formation</p><p class="label" lang="en">Education</p>
       <ul class="rows">
         <li><span><span lang="fr">M2 Perception artificielle et robotique (PAR)</span><span lang="en">MSc Artificial Perception and Robotics (PAR)</span><br><span class="mute">Université Clermont Auvergne, Institut Pascal</span></span><span>2026 –</span></li>
-        <li><span><span lang="fr">Diplôme d’ingénieur, domaine Machines, Robots et Systèmes, parcours SMR</span><span lang="en">Engineering degree, Machines, Robots and Systems, SMR track</span><br><span class="mute">SIGMA Clermont (INP Clermont Auvergne)</span></span><span>2023 –</span></li>
+        <li><span><span lang="fr">Diplôme d’ingénieur, domaine Machines, Robots et Systèmes, parcours Systèmes mécatroniques et robotiques</span><span lang="en">Engineering degree, Machines, Robots and Systems, Mechatronic and Robotic Systems track</span><br><span class="mute">SIGMA Clermont (INP Clermont Auvergne)</span></span><span>2023 –</span></li>
         <li><span><span lang="fr">Classes préparatoires PCSI puis PSI</span><span lang="en">Preparatory classes, PCSI then PSI</span><br><span class="mute">Lycée La Martinière Monplaisir, Lyon</span></span><span>2021 – 2023</span></li>
       </ul>
     </div>
@@ -553,30 +634,69 @@
   <section id="contact" class="sec">
     <div class="head"><div class="num">06</div><h2>Contact</h2></div>
     <div class="body">
-      <a class="big" href="mailto:albin.planeille@sigma-clermont.fr">albin.planeille@sigma-clermont.fr</a>
-      <ul class="rows" style="margin-top:2.5rem">
-        <li><span>LinkedIn</span><a href="https://www.linkedin.com/in/albinplaneille">linkedin.com/in/albinplaneille</a></li>
-        <li><span>GitHub</span><a href="https://github.com/Albinks1">github.com/Albinks1</a></li>
+      <ul class="rows contact">
+        <li><span><i class="bi bi-envelope"></i>E-mail</span><a href="mailto:albin.planeille@sigma-clermont.fr">albin.planeille@sigma-clermont.fr</a></li>
+        <li><span><i class="bi bi-linkedin"></i>LinkedIn</span><a href="https://www.linkedin.com/in/albinplaneille">linkedin.com/in/albinplaneille</a></li>
+        <li><span><i class="bi bi-github"></i>GitHub</span><a href="https://github.com/Albinks1">github.com/Albinks1</a></li>
       </ul>
-      <details class="doc" id="doc-cv" data-pdf="resumes/a_venir.pdf" style="margin-top:2.5rem">
-        <summary><span class="ic">PDF</span>
-          <span><span class="t" lang="fr">Curriculum vitæ</span><span class="t" lang="en">Curriculum vitae</span><span class="m todo">[cv.pdf]</span></span>
-          <span class="pm"></span></summary>
-        <div class="pdf"><p class="load">…</p></div>
-        <a class="dl" href="resumes/a_venir.pdf" download><span lang="fr">Télécharger ↓</span><span lang="en">Download ↓</span></a>
-      </details>
+      <button type="button" class="read" style="margin-top:2rem" data-pdf="resumes/cv_fr.pdf" data-pdf-en="resumes/cv_en.pdf" data-title="Curriculum vitæ" data-title-en="Curriculum vitae">
+        <span class="ic"><i class="bi bi-file-earmark-person"></i></span>
+        <span><span class="t">CV</span><span class="m" lang="fr">Curriculum vitæ, une page</span><span class="m" lang="en">Curriculum vitae, one page</span></span>
+        <span class="go"><span lang="fr">Lire</span><span lang="en">Read</span> <i class="bi bi-arrow-right"></i></span>
+      </button>
     </div>
   </section>
 
 </main>
 
 <footer>
-  <div class="wrap">
-    <p lang="fr">Photographies des sites : Wikimedia Commons, licence CC BY-SA 4.0 — ONERA Toulouse © YtoSu ; CEA Paris-Saclay © Cinerama14 ; CLAAS Quadrant 5300 FC © Matti Blume.</p>
-    <p lang="en">Site photographs: Wikimedia Commons, CC BY-SA 4.0 licence — ONERA Toulouse © YtoSu; CEA Paris-Saclay © Cinerama14; CLAAS Quadrant 5300 FC © Matti Blume.</p>
-    <p>Albin Planeille · 2026</p>
+  <div class="wrap cols">
+    <div class="brand">
+      <b>Albin Planeille</b>
+      <p lang="fr">Portfolio de compétences, élève ingénieur en vision par ordinateur et robotique.</p>
+      <p lang="en">Skills portfolio, engineering student in computer vision and robotics.</p>
+    </div>
+    <div>
+      <p class="k" lang="fr">Plan du site</p><p class="k" lang="en">Site map</p>
+      <ul>
+        <li><a href="#presentation"><span lang="fr">Présentation</span><span lang="en">Profile</span></a></li>
+        <li><a href="#competences"><span lang="fr">Compétences</span><span lang="en">Skills</span></a></li>
+        <li><a href="#projets"><span lang="fr">Projets</span><span lang="en">Projects</span></a></li>
+        <li><a href="#experiences"><span lang="fr">Expériences</span><span lang="en">Experience</span></a></li>
+        <li><a href="#complementaires"><span lang="fr">Complémentaires</span><span lang="en">Additional skills</span></a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="k">Contact</p>
+      <ul>
+        <li><a href="mailto:albin.planeille@sigma-clermont.fr"><i class="bi bi-envelope"></i>E-mail</a></li>
+        <li><a href="https://www.linkedin.com/in/albinplaneille"><i class="bi bi-linkedin"></i>LinkedIn</a></li>
+        <li><a href="https://github.com/Albinks1"><i class="bi bi-github"></i>GitHub</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="k" lang="fr">Langue</p><p class="k" lang="en">Language</p>
+      <div class="lang" role="group" aria-label="Langue / Language">
+        <button type="button" data-set="fr" aria-pressed="true">Français</button>
+        <button type="button" data-set="en" aria-pressed="false">English</button>
+      </div>
+    </div>
   </div>
+  <div class="wrap"><div class="base">
+    <span>© 2026 Albin Planeille</span>
+    <a class="up" href="#top" aria-label="Haut de page / Back to top"><i class="bi bi-arrow-up"></i></a>
+  </div></div>
 </footer>
+
+<!-- Lecteur PDF latéral -->
+<aside class="drawer" aria-label="PDF" aria-hidden="true">
+  <header>
+    <div class="tt"><b></b></div>
+    <a class="dl" href="#" download><i class="bi bi-download"></i><span class="dl-txt" lang="fr">Télécharger</span><span class="dl-txt" lang="en">Download</span></a>
+    <button type="button" data-close-reader aria-label="Fermer / Close"><i class="bi bi-x-lg"></i></button>
+  </header>
+  <div class="pages"></div>
+</aside>
 
 <script type="module">
 const root = document.documentElement;
@@ -600,43 +720,67 @@ const io = new IntersectionObserver(es => es.forEach(e => {
 }), { rootMargin: '-40% 0px -55% 0px' });
 document.querySelectorAll('main section').forEach(s => io.observe(s));
 
-/* Lien « Voir le CV » : ouvre le volet */
+/* Ligne de progression de lecture */
+const nav = document.querySelector('nav');
+const onScroll = () => { const h = document.documentElement; nav.style.setProperty('--p', Math.min(1, h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)).toFixed(4)); };
+addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll); onScroll();
+
+/* Renvois : ouvrent le volet visé */
 document.querySelectorAll('[data-open]').forEach(a => a.addEventListener('click', () => {
   const d = document.getElementById(a.dataset.open); if (d) d.open = true;
 }));
 
-/* PDF.js : rendu à la première ouverture d'un volet */
+/* Blocs : reflet qui suit le curseur */
+document.querySelectorAll('.sk .card').forEach(c => c.addEventListener('pointermove', e => {
+  const r = c.getBoundingClientRect();
+  c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+}));
+
+/* Lecteur PDF latéral (PDF.js, repli sur le lecteur du navigateur) */
+const drawer = document.querySelector('.drawer'), pages = drawer.querySelector('.pages');
+const dTitle = drawer.querySelector('.tt b'), dDl = drawer.querySelector('.dl');
 const PDFJS = './vendor/pdfjs/';
-let lib = null;
+let lib = null, token = 0, opener = null;
 async function pdfjs() {
   if (!lib) { lib = await import(PDFJS + 'pdf.min.mjs'); lib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.mjs'; }
   return lib;
 }
-async function render(box, url) {
-  const msg = box.querySelector('.load');
+async function openReader(btn) {
+  const en = root.dataset.lang === 'en';
+  const url = (en && btn.dataset.pdfEn) || btn.dataset.pdf;
+  if (opener) opener.setAttribute('aria-expanded', 'false');
+  opener = btn; btn.setAttribute('aria-expanded', 'true'); const my = ++token;
+  dTitle.textContent = (en && btn.dataset.titleEn) || btn.dataset.title; dDl.href = url;
+  pages.innerHTML = '<p class="load">' + (en ? 'Loading…' : 'Chargement…') + '</p>';
+  root.classList.add('reading'); drawer.setAttribute('aria-hidden', 'false');
   try {
     const { getDocument } = await pdfjs();
     const doc = await getDocument(url).promise;
-    const w = box.clientWidth - 40, dpr = window.devicePixelRatio || 1;
+    if (my !== token) return;
+    pages.innerHTML = '';
+    const w = pages.clientWidth - parseFloat(getComputedStyle(pages).paddingLeft) * 2, dpr = window.devicePixelRatio || 1;
     for (let i = 1; i <= doc.numPages; i++) {
       const page = await doc.getPage(i);
+      if (my !== token) return;
       const vp = page.getViewport({ scale: (w / page.getViewport({ scale: 1 }).width) * dpr });
       const cv = document.createElement('canvas');
       cv.width = vp.width; cv.height = vp.height;
-      box.appendChild(cv);
+      pages.appendChild(cv);
       await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      requestAnimationFrame(() => cv.classList.add('in'));
     }
-    msg.remove();
   } catch (e) {
-    const en = root.dataset.lang === 'en';
-    msg.innerHTML = (en ? 'Preview available once online. ' : 'Aperçu disponible une fois en ligne. ') + '<a href="' + url + '">' + (en ? 'Open the PDF' : 'Ouvrir le PDF') + '</a>';
+    if (my !== token) return;
+    pages.innerHTML = '<iframe title="PDF" src="' + url + '"></iframe>';
   }
 }
-document.querySelectorAll('details[data-pdf]').forEach(d => {
-  const go = () => { if (d.open && !d.dataset.done) { d.dataset.done = 1; render(d.querySelector('.pdf'), d.dataset.pdf); } };
-  d.addEventListener('toggle', go);
-  go();
-});
+function closeReader() {
+  token++; root.classList.remove('reading'); drawer.setAttribute('aria-hidden', 'true');
+  if (opener) opener.setAttribute('aria-expanded', 'false');
+}
+document.querySelectorAll('.read').forEach(b => b.addEventListener('click', () => openReader(b)));
+document.querySelectorAll('[data-close-reader]').forEach(b => b.addEventListener('click', closeReader));
+addEventListener('keydown', e => { if (e.key === 'Escape' && root.classList.contains('reading')) closeReader(); });
 </script>
 </body>
 </html>
